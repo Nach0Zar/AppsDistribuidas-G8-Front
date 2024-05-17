@@ -4,9 +4,9 @@ import SplashScreen from 'react-native-splash-screen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import Login from './components/login/Login';
-import NewUser from  './components/newUser/NewUser';
-import Home from  './components/Home/Home';
+import Login from './ui/screens/Login';
+import NewUser from  './ui/screens/NewUser';
+import Home from  './ui/screens/Home';
 
 const Stack = createNativeStackNavigator();
 

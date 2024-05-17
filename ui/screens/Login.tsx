@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { User } from '@react-native-google-signin/google-signin/src/types';
-import loginStyles from './loginStyles';
+import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
 
 interface UserInfo {
@@ -38,12 +38,16 @@ const Login = ({ navigation }: { navigation: any }) => {
       const response = await axios.post('/auths', { header });
       const jwtToken = response.data
 
-      
+      /*
+      TODO: Pass JWT logic, Put? Delete?
+      */
+
+
       if (response.status === 201) { //hardcode this to test
         //201 = new user - register user
-        navigation.navigate('NewUser');
+        navigation.navigate('NewUser'); //TODO: pass token to this screen?
       } else { //200 = login user
-        navigation.navigate('Home');
+        navigation.navigate('Home'); ////TODO: pass token to this screen?
       }
 
     } catch (error:any) {
