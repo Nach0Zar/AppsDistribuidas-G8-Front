@@ -54,7 +54,7 @@ const Login = ({ navigation }: { navigation: any }) => {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert('Login cancelado', 'Cancelaste el proceso de login.');
       } else {
-        Alert.alert('Login Error', 'Error inesperado.');
+      Alert.alert('Login Error', 'Error inesperado.'); //FIXME: signin don't working, entering here when loging in
       }
     }
   };
