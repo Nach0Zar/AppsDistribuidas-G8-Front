@@ -1,4 +1,4 @@
-package com.appsdistribuidasg8
+package com.ad1g8
 
 import android.app.Application
 import com.facebook.react.PackageList

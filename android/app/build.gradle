@@ -74,9 +74,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.appsdistribuidasg8"
+    namespace "com.ad1g8"
     defaultConfig {
-        applicationId "com.appsdistribuidasg8"
+        applicationId "com.ad1g8"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
