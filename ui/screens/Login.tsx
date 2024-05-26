@@ -49,12 +49,11 @@ useEffect(() => {
       } else {
         navigation.navigate('Home');
       }
-
     } catch (error:any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert('Login cancelado', 'Cancelaste el proceso de login.');
       } else {
-      Alert.alert('Login Error', 'Error inesperado.'); //FIXME: signin don't working, entering here when loging in
+        Alert.alert('Login Error', 'Error inesperado.');
       }
     }
   };
