@@ -9,45 +9,45 @@ interface UserInfo {
   name: string;
   email: string;
   photo: string;
+  googleToken: string;
+  sessionToken: string;
 }
 
 const Login = ({ navigation }: { navigation: any }) => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '371785366082-fnuudgb8h47kfv9nmjaag14van5fk0s4.apps.googleusercontent.com',
-    });
-  }, []);
+useEffect(() => {
+  GoogleSignin.configure({
+    webClientId: '1058795952414-kt6i0psmqpvc2rdbedbpe4ijk81hls1h.apps.googleusercontent.com',
+    offlineAccess: true
+  });
+}, []);
 
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
+      const config = {
+        headers: {
+        'Authorization': userInfo.idToken,
+        'Content-Type': 'application/json'}
+      };
+      const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
+      const jwtToken = response.data
+      /*
+      TODO: Pass JWT logic, Put? Delete?
+      */
       setUserInfo({
         name: userInfo.user.name || '',
         email: userInfo.user.email  || '',
         photo: userInfo.user.photo || '',
+        googleToken: userInfo.idToken || '',
+        sessionToken: jwtToken || ''
       });
-
-      const header = {
-        'Authorization': userInfo.idToken,
-        'Content-Type': 'application/json',
-      };
-
-      const response = await axios.post('/auths', { header });
-      const jwtToken = response.data
-
-      /*
-      TODO: Pass JWT logic, Put? Delete?
-      */
-
-
-      if (response.status === 201) { //hardcode this to test
-        //201 = new user - register user
-        navigation.navigate('NewUser'); //TODO: pass token to this screen?
-      } else { //200 = login user
-        navigation.navigate('Home'); ////TODO: pass token to this screen?
+      if (response.status === 201) {
+        navigation.navigate('NewUser');
+      } else {
+        navigation.navigate('Home');
       }
 
     } catch (error:any) {
