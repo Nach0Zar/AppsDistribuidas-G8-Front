@@ -1,27 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import { User } from '@react-native-google-signin/google-signin/src/types';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
 
-interface UserInfo {
-  name: string;
-  email: string;
-  photo: string;
-  googleToken: string;
-  sessionToken: string;
-}
-
 const Login = ({ navigation }: { navigation: any }) => {
-const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-useEffect(() => {
-  GoogleSignin.configure({
-    webClientId: '1058795952414-kt6i0psmqpvc2rdbedbpe4ijk81hls1h.apps.googleusercontent.com',
-    offlineAccess: true
-  });
-}, []);
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '1058795952414-kt6i0psmqpvc2rdbedbpe4ijk81hls1h.apps.googleusercontent.com',
+      offlineAccess: true
+    });
+  }, []);
 
   const signIn = async () => {
     try {
@@ -37,13 +28,13 @@ useEffect(() => {
       /*
       TODO: Pass JWT logic, Put? Delete?
       */
-      setUserInfo({
-        name: userInfo.user.name || '',
-        email: userInfo.user.email  || '',
-        photo: userInfo.user.photo || '',
-        googleToken: userInfo.idToken || '',
-        sessionToken: jwtToken || ''
-      });
+      await AsyncStorage.clear()
+      await AsyncStorage.setItem('@firstname', userInfo.user.name || '');
+      await AsyncStorage.setItem('@lastname', userInfo.user.givenName || '');
+      await AsyncStorage.setItem('@email', userInfo.user.email || '');
+      await AsyncStorage.setItem('@image', userInfo.user.photo || '');
+      await AsyncStorage.setItem('@googleToken', userInfo.idToken || '');
+      await AsyncStorage.setItem('@sessionToken', jwtToken || '');
       if (response.status === 201) {
         navigation.navigate('NewUser');
       } else {
