@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, StyleSheet, TouchableHighlight, TouchableOpacity, View, Text} from "react-native";
-import { COLOR } from "../../../../styles/Theme";
+import { COLOR } from "../../styles/Theme";
 
 
 type Props = {
@@ -9,19 +9,15 @@ type Props = {
 }
 
 
-
-
-
 export const CustomButton = ({title, onPress} : Props) => {
     return(
-        <TouchableHighlight onPress={onPress}>
-            <View style={styles.button}>
+        <TouchableHighlight style={styles.button} onPress={onPress}>
+            <View>
                 <Text style={styles.text}>{title}</Text>
             </View>
         </TouchableHighlight>
     )
 }
-
 
 
 const styles = StyleSheet.create({
@@ -31,6 +27,7 @@ const styles = StyleSheet.create({
         alignItems : 'center',
         padding:10,
         borderRadius: 6.5,
+        width: '73%'
     },
     text:{
         fontWeight: "600",
