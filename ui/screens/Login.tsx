@@ -25,9 +25,6 @@ const Login = ({ navigation }: { navigation: any }) => {
       };
       const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
       const jwtToken = response.data
-      /*
-      TODO: Pass JWT logic, Put? Delete?
-      */
       await AsyncStorage.clear()
       await AsyncStorage.setItem('@firstname', userInfo.user.name || '');
       await AsyncStorage.setItem('@lastname', userInfo.user.givenName || '');
