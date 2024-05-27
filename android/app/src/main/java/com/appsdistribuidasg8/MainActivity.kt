@@ -1,4 +1,4 @@
-package com.appsdistribuidasg8
+package com.ad1g8
 import android.os.Bundle
 
 import com.facebook.react.ReactActivity
