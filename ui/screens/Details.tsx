@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const NewUser = () => {
+const Details = () => {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>New User Screen</Text>
+      <Text>Details Screen</Text>
     </View>
   );
 };
 
-export default NewUser;
+export default Details;
