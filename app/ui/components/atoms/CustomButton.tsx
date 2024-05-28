@@ -25,14 +25,17 @@ const styles = StyleSheet.create({
         backgroundColor: COLOR.primary,
         color: COLOR.secondBackground,
         alignItems : 'center',
+        justifyContent: 'center',
         padding:10,
         borderRadius: 6.5,
-        width: '73%'
+        width: 260,
+        height: 53
     },
     text:{
         fontWeight: "600",
         fontStyle: 'normal',
-        fontSize: 18
+        fontSize: 18,
+        color: COLOR.secondBackground
     }
 
 })

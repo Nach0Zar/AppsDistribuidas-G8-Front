@@ -1,5 +1,5 @@
 export enum Routes{
-    LoginStack = "Login",
-    ProfileInfoStack = "Profile Info",
-    HomeStack = "Home"
+    Login = "Login",
+    ProfileInfo = "Profile Info",
+    Home = "Home"
 }
