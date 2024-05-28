@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
 
-const Login = ({ navigation }: { navigation: any }) => {
+const Login = () => {
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -14,7 +16,10 @@ const Login = ({ navigation }: { navigation: any }) => {
     });
   }, []);
 
+  const navigation = useNavigation();
+
   const signIn = async () => {
+
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
@@ -33,9 +38,11 @@ const Login = ({ navigation }: { navigation: any }) => {
       await AsyncStorage.setItem('@googleToken', userInfo.idToken || '');
       await AsyncStorage.setItem('@sessionToken', jwtToken || '');
       if (response.status === 201) {
-        navigation.navigate('NewUser');
+        //navigation.navigate('NewUser') TODO: Para mi sacamos este stack
       } else {
-        navigation.navigate('Home');
+        navigation.dispatch(
+          StackActions.replace("LandingStack")
+        );
       }
     } catch (error:any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
