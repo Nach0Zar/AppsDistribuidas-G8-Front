@@ -4,8 +4,9 @@ import HomeStack from './HomeStack';
 import { faHouse, faStar, faUser} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import Favs from "../ui/screens/Favs";
-import Profile from "../ui/screens/Profile";
+
 import { faHouse as regularHouse, faStar as regularStar, faUser as regularUser} from "@fortawesome/free-solid-svg-icons";
+import Profile from "../ui/screens/Profile";
 
 const Tab = createBottomTabNavigator();
 

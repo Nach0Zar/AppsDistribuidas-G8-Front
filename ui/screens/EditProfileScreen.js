@@ -11,7 +11,7 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import {Routes} from '../../navigation/Routes';
+import {Routes} from '../../Navigation/Routes';
 import {ProfileInfo} from '../components/molecules/ProfileInfo';
 import {CustomButton} from '../components/atoms/CustomButton';
 import {SafeAreaView} from 'react-native-safe-area-context';

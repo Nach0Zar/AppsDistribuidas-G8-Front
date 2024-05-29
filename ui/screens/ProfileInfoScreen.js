@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import {CustomButton} from '../components/atoms/CustomButton';
-import {Routes} from '../../navigation/Routes';
+import {Routes} from '../../Navigation/Routes';
 import {useState} from 'react';
 import {CustomModal} from '../components/organisms/CustomModal';
 

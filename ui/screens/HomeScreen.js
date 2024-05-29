@@ -3,7 +3,7 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Button, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import COLORS from "../styles/Theme";
-import { Routes } from "../../navigation/Routes";
+import { Routes } from "../../Navigation/Routes";
 import { CustomButton } from "../components/atoms/CustomButton";
 
 

@@ -6,8 +6,9 @@ import SplashScreen from 'react-native-splash-screen';
 
 
 import Login from './ui/screens/Login';
-import NewUser from  './ui/screens/NewUser';
 import Home from  './ui/screens/Home';
+import NewUser from './ui/screens/NewUser';
+import RootNavigator from './Navigation/RootNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,28 +19,7 @@ const App = () => {
   }, []);
   
   return (
-    <>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="login">
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{
-              title: '',
-              headerTransparent: true,
-            }}
-          />
-          <Stack.Screen
-            name="NewUser"
-            component={NewUser}
-          />
-          <Stack.Screen
-            name="Home"
-            component={Home}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </>
+    <RootNavigator/>
   );
   {/*<NavigationContainer>
       {/*<LoginNavigation/>
