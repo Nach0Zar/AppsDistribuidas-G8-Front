@@ -9,14 +9,19 @@ import {
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import {CustomButton} from '../components/atoms/CustomButton';
-import {Routes} from '../../Navigation/Routes';
 import {useState} from 'react';
 import {CustomModal} from '../components/organisms/CustomModal';
+import { useNavigation } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
+import Routes from '../../Navigation/Routes';
 
-export const ProfileInfoScreen = ({navigation}) => {
-  const [modalLogoutVisible, setModalLogoutVisible] = useState(true);
-  const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(true);
+export const ProfileInfoScreen = () => {
+  const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
+  const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
 
+  const navigation = useNavigation();
+
+  //TODO: Obtener los datos del usuario, que no esten hardcodeados
   return (
     <View style={styles.container}>
       <Image
@@ -50,7 +55,7 @@ export const ProfileInfoScreen = ({navigation}) => {
         text="Estas seguro que queres cerrar la sesión?"
         actionButton={{
           title: 'Si, cerrar',
-          onPress: () => console.log('Cerrar sesion!!'),
+          onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)),
         }}
         closeButton={{
           title: 'Cancelar',
@@ -62,7 +67,7 @@ export const ProfileInfoScreen = ({navigation}) => {
         text="Estas seguro que queres eliminar tu cuenta?"
         actionButton={{
           title: 'Si, eliminar',
-          onPress: () => console.log('Eliminar cuenta!!'),
+          onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)), //TODO: eliminar la cuenta
         }}
         closeButton={{
           title: 'Cancelar',

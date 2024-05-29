@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from "../ui/screens/Login";
 import LandingStack from './LandingStack';
 import HomeStack from './HomeStack';
+import Routes from "./Routes";
 
 const Stack = createNativeStackNavigator();
 
@@ -11,18 +12,18 @@ const RootNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName={Routes.LoginScreen}
         screenOptions={ {headerShown: false} }>
         <Stack.Screen
-          name="Login"
+          name={Routes.LoginScreen}
           component={Login}
         />
         <Stack.Screen
-          name="LandingStack"
+          name={Routes.LandingStack}
           component={LandingStack}
         />
         <Stack.Screen
-          name="HomeStack"
+          name={Routes.HomeStack}
           component={HomeStack}
         />
       </Stack.Navigator>

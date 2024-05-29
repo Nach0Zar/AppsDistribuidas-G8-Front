@@ -11,17 +11,21 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import {Routes} from '../../Navigation/Routes';
 import {ProfileInfo} from '../components/molecules/ProfileInfo';
 import {CustomButton} from '../components/atoms/CustomButton';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {COLOR} from '../styles/Theme';
 import {ProfileImage} from '../components/atoms/ProfileImage';
 import { PressableText } from '../components/atoms/PressableText';
+import { useNavigation } from '@react-navigation/native';
 
 
+export const EditProfileScreen = () => {
 
-export const EditProfileScreen = ({navigation}) => {
+  //TODO: Nombre, apellido e email, tienen que aparecer cargados y no se pueden editar. Solo nickname editable. 
+  //TODO: Accion de guardar nickname cuando click en Guardar
+
+  const navigation = useNavigation();
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>

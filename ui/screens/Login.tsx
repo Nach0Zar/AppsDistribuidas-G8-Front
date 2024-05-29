@@ -6,6 +6,7 @@ import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
+import Routes from '../../Navigation/Routes';
 
 const Login = () => {
 
@@ -41,7 +42,7 @@ const Login = () => {
         //navigation.navigate('NewUser') TODO: Para mi sacamos este stack
       } else {
         navigation.dispatch(
-          StackActions.replace("LandingStack")
+          StackActions.replace(Routes.LandingStack)
         );
       }
     } catch (error:any) {

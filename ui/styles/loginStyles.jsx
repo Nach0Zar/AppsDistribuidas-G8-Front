@@ -1,11 +1,12 @@
 import {StyleSheet} from 'react-native';
+import { COLOR } from './Theme';
 
 const loginStyles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#31363F',
+      backgroundColor: COLOR.primaryBackground,
     },
     logo: {
       height: 280,
@@ -20,7 +21,7 @@ const loginStyles = StyleSheet.create({
     },
     googleButton: {
       marginTop: 10,
-      backgroundColor: '#76ABAE',
+      backgroundColor: COLOR.primary,
       paddingVertical: 15,
       paddingRight: 57,
       borderRadius: 7,

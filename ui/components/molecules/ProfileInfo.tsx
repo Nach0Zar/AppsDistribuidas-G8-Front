@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { ProfileImage } from "../atoms/ProfileImage";
 import { COLOR } from "../../styles/Theme";
 
-
+//TODO: obtener la imagen del usuario sin hardcodear
 export const ProfileInfo = () => {
     const [name, setName] = useState('');
     const [surnname, setSurname] = useState('')
@@ -12,7 +12,6 @@ export const ProfileInfo = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Datos del usuario</Text>
             <Pressable onPress={() => null} style={styles.press}>
             <Image
                 style={styles.profileImage}
@@ -49,8 +48,6 @@ export const ProfileInfo = () => {
                 placeholderTextColor="grey"
             />
         </View>
-
-        
     )
 }
 
@@ -61,7 +58,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderWidth: 1,
         width : '75%',
-        borderRadius: 10,
+        borderRadius: 4,
         padding: 10,
         backgroundColor: COLOR.second
     },
@@ -83,7 +80,7 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         height: 150,
         width: 150,
-        backgroundColor: 'red'
+        backgroundColor: 'red',
+        marginBottom: 40
     }
-
 })

@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
+import { COLOR
 
+ } from '../styles/Theme';
 const Favs = () => {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#31363F' }}>
-      <Text style={{color: '#EEEEEE'}}>Favs Screen</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR.primaryBackground }}>
+      <Text style={{color: COLOR.second}}>Favs Screen</Text>
     </View>
   );
 };
