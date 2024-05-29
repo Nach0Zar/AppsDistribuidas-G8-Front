@@ -6,20 +6,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import Favs from "../ui/screens/Favs";
 import Profile from "../ui/screens/Profile";
 import { faHouse as regularHouse, faStar as regularStar, faUser as regularUser} from "@fortawesome/free-solid-svg-icons";
+import Routes from "./Routes";
 
 const Tab = createBottomTabNavigator();
 
 const LandingStack = () => {
   return (
     <Tab.Navigator
-      initialRouteName="HomeStack"
+      initialRouteName={Routes.HomeStack}
       screenOptions={{
         headerShown:false,
         tabBarStyle: {backgroundColor: '#222831'},
       }}
     >
       <Tab.Screen
-        name = "Home"
+        name = {Routes.HomeStack}
         component={HomeStack}
         options={{
           tabBarLabel: '',
@@ -33,7 +34,7 @@ const LandingStack = () => {
         }}
       />
       <Tab.Screen
-        name="Favs"
+        name={Routes.FavsScreen}
         component={Favs}
         options={{
           tabBarLabel: '',
@@ -47,7 +48,7 @@ const LandingStack = () => {
         }}
       />
       <Tab.Screen
-        name="Profile"
+        name={Routes.ProfileScreen}
         component={Profile}
         options={{
           tabBarLabel: '',

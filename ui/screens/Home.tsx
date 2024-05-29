@@ -3,6 +3,7 @@ import { SafeAreaView, View, Text, TouchableOpacity, TextInput } from 'react-nat
 import homeStyles from '../styles/homeStyles';
 import { useNavigation } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
+import Routes from '../../Navigation/Routes';
 
 const Home = () => {
 
@@ -14,7 +15,7 @@ const Home = () => {
         <TextInput 
           style={homeStyles.input}
           placeholder="Ingrese nombre de pelicula o actor..."
-          onPress={() => navigation.push('MovieSearch')}
+          onPress={() => navigation.push(Routes.MovieSearchScreen)}
         />
       </View>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
