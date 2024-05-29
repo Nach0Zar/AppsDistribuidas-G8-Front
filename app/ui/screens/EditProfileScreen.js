@@ -17,87 +17,19 @@ import {CustomButton} from '../components/atoms/CustomButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {COLOR} from '../styles/Theme';
 import {ProfileImage} from '../components/atoms/ProfileImage';
+import { PressableText } from '../components/atoms/PressableText';
+
+
 
 export const EditProfileScreen = ({navigation}) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => null}>
-          <Text style={styles.pressableText}>Omitir por ahora</Text>
-        </Pressable>
+        <PressableText text='Cancelar' onPress={() => navigation.goBack()}/>
       </View>
-      <View style={{alignItems: 'center'}}>
-        <Text style={styles.title}>Datos del usuario</Text>
-        <Image
-          style={styles.profileImage}
-          source={{
-            uri: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-          }}></Image>
-
-        <TextInput
-          placeholder="Username"
-          placeholderTextColor="grey"
-          keyboardType="email-address"
-          style={{
-            fontSize: 15,
-            height: 40,
-            width: '75%',
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: 10,
-            marginBottom: 14,
-            backgroundColor: COLOR.second,
-            marginTop: 23
-          }}
-        />
-        <TextInput
-          placeholder="Surname"
-          placeholderTextColor="grey"
-          keyboardType="email-address"
-          style={{
-            fontSize: 15,
-            height: 40,
-            width: '75%',
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: 10,
-            marginBottom: 14,
-            backgroundColor: COLOR.second,
-          }}
-        />
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="grey"
-          keyboardType="email-address"
-          style={{
-            fontSize: 15,
-            height: 40,
-            width: '75%',
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: 10,
-            marginBottom: 14,
-            backgroundColor: COLOR.second,
-          }}
-        />
-        <TextInput
-          placeholder="Nickname"
-          placeholderTextColor="grey"
-          keyboardType="email-address"
-          style={{
-            fontSize: 15,
-            height: 40,
-            width: '75%',
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: 10,
-            backgroundColor: COLOR.second,
-          }}
-        />
-      </View>
-
-      <View style={{marginTop: 160, alignItems: 'center'}}>
-        <CustomButton title='Guardar'></CustomButton>
+      <ProfileInfo/>
+      <View style={{marginTop: 160, marginBottom: 10, alignItems: 'center'}}>
+        <CustomButton title='Guardar' color={COLOR.black}></CustomButton>
       </View>
     </ScrollView>
   );
@@ -108,17 +40,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.primaryBackground,
     flexDirection: 'column',
     flex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'semibold',
-    marginBottom: 12,
-    color: COLOR.second,
-  },
-  profileImage: {
-    height: 150,
-    width: 150,
-    borderRadius: 100,
   },
   header: {
     flexDirection: 'row',
@@ -132,19 +53,5 @@ const styles = StyleSheet.create({
     color: COLOR.second,
     fontWeight: 'medium',
     fontFamily: 'roboto',
-  },
-  buttonContainer: {
-    backgroundColor: 'green',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileContainer: {
-    backgroundColor: 'orange',
-    flex: 1,
-  },
-  topButtonContainer: {},
-  topButton: {
-    text: {},
-  },
+  }
 });

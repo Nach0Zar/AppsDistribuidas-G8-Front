@@ -4,10 +4,10 @@ import React, {useEffect} from 'react';
 import { Text } from "react-native"
 import SplashScreen from 'react-native-splash-screen';
 import { LoginScreen } from './app/ui/screens/LoginScreen.js';
-import { LoginNavigation, RootStackParamList } from './app/navigation/Navigation';
+import { LoginNavigation, ProfileNavigation } from './app/navigation/Navigation';
 
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator();
 
 const App = () => {
 
@@ -18,7 +18,8 @@ const App = () => {
 
   return(
     <NavigationContainer>
-      <LoginNavigation/>
+      {/*<LoginNavigation/>*/}
+      <ProfileNavigation/>
     </NavigationContainer>
   )
 }

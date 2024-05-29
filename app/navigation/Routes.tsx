@@ -1,5 +1,6 @@
 export enum Routes{
     Login = "Login",
     ProfileInfo = "Profile Info",
-    Home = "Home"
+    Home = "Home",
+    EditProfile = "Edit Profile"
 }

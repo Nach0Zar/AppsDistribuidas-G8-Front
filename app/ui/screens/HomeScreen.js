@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import COLORS from "../styles/Theme";
 import { Routes } from "../../navigation/Routes";
+import { CustomButton } from "../components/atoms/CustomButton";
 
 
 
@@ -14,6 +15,8 @@ export const HomeScreen = ({navigation}) => {
     const [isChecked, setIsChecked] = useState(false);
 
     return(
-        <View></View>
+        <View>
+            <CustomButton title="Login" onPress={navigation.push(Routes.EditProfile)}/>
+        </View>
     )
 }

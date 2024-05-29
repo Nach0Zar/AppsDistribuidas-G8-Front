@@ -5,25 +5,25 @@ import { COLOR } from "../../styles/Theme";
 
 type Props = {
     title: Required<string>,
-    onPress: () => void
+    onPress? : () => void
+    backgroundColor? : string,
+    color: string
 }
 
 
-export const CustomButton = ({title, onPress} : Props) => {
+export const CustomButton = (props : Props) => {
     return(
-        <TouchableHighlight style={styles.button} onPress={onPress}>
-            <View>
-                <Text style={styles.text}>{title}</Text>
-            </View>
+        <TouchableHighlight style={[styles.button, {...props}]} onPress={props.onPress}>
+            <Text style={[styles.text,{...props}]}>{props.title}</Text>
         </TouchableHighlight>
     )
 }
 
 
+
 const styles = StyleSheet.create({
     button:{
         backgroundColor: COLOR.primary,
-        color: COLOR.secondBackground,
         alignItems : 'center',
         justifyContent: 'center',
         padding:10,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontStyle: 'normal',
         fontSize: 18,
-        color: COLOR.secondBackground
+        color: COLOR.black
     }
 
 })
