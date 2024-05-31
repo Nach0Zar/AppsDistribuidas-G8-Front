@@ -31,18 +31,27 @@ const Login = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const config = {
+      let config = {
         headers: {
-        'Authorization': userInfo.idToken,
-        'Content-Type': 'application/json'}
+          'Authorization': userInfo.idToken,
+          'Content-Type': 'application/json'
+        }
       };
       const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
       const jwtToken = response.data
+      config = {
+        headers: {
+          'Authorization': jwtToken,
+          'Content-Type': 'application/json'
+        }
+      };
+      const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users', {}, config);
+      const authedUserInformation = authedUserInformationResponse.data
       await AsyncStorage.clear()
-      await AsyncStorage.setItem('@firstname', userInfo.user.name || '');
-      await AsyncStorage.setItem('@lastname', userInfo.user.givenName || '');
-      await AsyncStorage.setItem('@email', userInfo.user.email || '');
-      await AsyncStorage.setItem('@image', userInfo.user.photo || '');
+      await AsyncStorage.setItem('@firstname', authedUserInformation.firstname || '');
+      await AsyncStorage.setItem('@lastname', authedUserInformation.lastname  || '');
+      await AsyncStorage.setItem('@email', authedUserInformation.email || '');
+      await AsyncStorage.setItem('@image', authedUserInformation.image || '');
       await AsyncStorage.setItem('@googleToken', userInfo.idToken || '');
       await AsyncStorage.setItem('@sessionToken', jwtToken || '');
       if (response.status === 201) {
