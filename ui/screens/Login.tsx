@@ -24,13 +24,22 @@ const Login = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const config = {
+      let config = {
         headers: {
-        'Authorization': userInfo.idToken,
-        'Content-Type': 'application/json'}
+          'Authorization': userInfo.idToken,
+          'Content-Type': 'application/json'
+        }
       };
       const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
       const jwtToken = response.data
+      config = {
+        headers: {
+          'Authorization': jwtToken,
+          'Content-Type': 'application/json'
+        }
+      };
+      const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users', {}, config);
+      const authedUserInformation = authedUserInformationResponse.data
       await AsyncStorage.clear()
       await AsyncStorage.setItem('@firstname', userInfo.user.name || '');
       await AsyncStorage.setItem('@lastname', userInfo.user.givenName || '');
