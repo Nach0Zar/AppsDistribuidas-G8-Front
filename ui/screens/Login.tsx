@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -8,13 +8,20 @@ import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
 
+const GoogleLogin = async () => {
+  await GoogleSignin.hasPlayServices();
+  const userInfo = await GoogleSignin.signIn();
+  return userInfo;
+}
+
+
 const Login = () => {
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '1058795952414-kt6i0psmqpvc2rdbedbpe4ijk81hls1h.apps.googleusercontent.com',
-      offlineAccess: true
-    });
+    
   }, []);
 
   const navigation = useNavigation();
