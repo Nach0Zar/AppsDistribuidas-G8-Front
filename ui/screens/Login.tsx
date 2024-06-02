@@ -13,10 +13,11 @@ const Login = () => {
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
+      await GoogleSignin.signIn();
+      const newTokens = await GoogleSignin.getTokens();
       let config = {
         headers: {
-          'Authorization': userInfo.idToken,
+          'Authorization': newTokens.accessToken,
           'Content-Type': 'application/json'
         }
       };
@@ -35,7 +36,7 @@ const Login = () => {
       await AsyncStorage.setItem('@lastname', authedUserInformation.lastname  || '');
       await AsyncStorage.setItem('@email', authedUserInformation.email || '');
       await AsyncStorage.setItem('@image', authedUserInformation.image || '');
-      await AsyncStorage.setItem('@googleToken', userInfo.idToken || '');
+      await AsyncStorage.setItem('@accessToken', newTokens.accessToken || '');
       await AsyncStorage.setItem('@sessionToken', jwtToken || '');
       // if (response.status === 201) {
       //   setLoggedIn(true);
