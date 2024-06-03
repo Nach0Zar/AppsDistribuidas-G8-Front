@@ -32,7 +32,7 @@ const Login = () => {
       const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users', config);
       const authedUserInformation = authedUserInformationResponse.data
       await AsyncStorage.clear()
-      await AsyncStorage.setItem('@firstname', authedUserInformation.firstname || '');
+      await AsyncStorage.setItem('@firstname', authedUserInformation.firstname || '');//TODO setup in redux
       await AsyncStorage.setItem('@lastname', authedUserInformation.lastname  || '');
       await AsyncStorage.setItem('@email', authedUserInformation.email || '');
       await AsyncStorage.setItem('@image', authedUserInformation.image || '');
@@ -57,7 +57,7 @@ const Login = () => {
     }
   };
   const checkIfLoggedIn = async () => {
-    let googleToken = await AsyncStorage.getItem('@googleToken')
+    let googleToken = await AsyncStorage.getItem('@accessToken')
     if (googleToken == '' || googleToken == null){
       setLoggedIn(false)
     }
