@@ -14,12 +14,19 @@ import {CustomModal} from '../components/organisms/CustomModal';
 import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
+import GoogleSignIn from '../asset/GoogleSignIn';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
 
   const navigation = useNavigation();
+  const closeSession = async () => {
+      GoogleSignIn.signOut();
+      await AsyncStorage.clear();
+      navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+  }
 
   //TODO: Obtener los datos del usuario, que no esten hardcodeados
   return (
@@ -55,7 +62,7 @@ export const ProfileInfoScreen = () => {
         text="Estas seguro que queres cerrar la sesión?"
         actionButton={{
           title: 'Si, cerrar',
-          onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)),
+          onPress: () => closeSession(),
         }}
         closeButton={{
           title: 'Cancelar',

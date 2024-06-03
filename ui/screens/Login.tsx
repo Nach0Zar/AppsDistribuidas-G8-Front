@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { statusCodes } from '@react-native-google-signin/google-signin';
+import GoogleSignIn from '../asset/GoogleSignIn';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
@@ -12,9 +13,8 @@ const Login = () => {
   const [loggedIn, setLoggedIn] = useState<null | boolean>(null);
   const signIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      await GoogleSignin.signIn();
-      const newTokens = await GoogleSignin.getTokens();
+      await GoogleSignIn.signIn();
+      const newTokens = await GoogleSignIn.getTokens();
       let config = {
         headers: {
           'Authorization': newTokens.accessToken,
@@ -66,10 +66,6 @@ const Login = () => {
     }
   }
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '1058795952414-kt6i0psmqpvc2rdbedbpe4ijk81hls1h.apps.googleusercontent.com',
-      offlineAccess: true
-    });
     if(loggedIn == null){
       checkIfLoggedIn();
     }
