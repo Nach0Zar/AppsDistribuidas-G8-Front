@@ -1,5 +1,7 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Dimensions} from 'react-native';
 import { COLOR } from './Theme';
+
+const { width, height } = Dimensions.get('window');
 
 const homeStyles = StyleSheet.create({
     container: {
@@ -20,10 +22,10 @@ const homeStyles = StyleSheet.create({
     },
     input: {
       flex: 1,
-      height: 40,
+      height: height * 0.06,
       borderRadius: 20,
-      paddingHorizontal: 20,
-      marginHorizontal: 20,
+      paddingHorizontal: width * 0.04,
+      marginHorizontal: width * 0.046,
       backgroundColor: COLOR.second,
     }
   });
