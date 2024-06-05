@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
+import { Global } from '../../Constants';
 
 const GoogleLogin = async () => {
   await GoogleSignin.hasPlayServices();
@@ -32,11 +33,12 @@ const Login = () => {
         console.log('Hay un jwt almacenado: ' + jwt)
         navigation.dispatch(StackActions.replace(Routes.LandingStack));
       }
-      console.log('No hay un jwt almacenado')
-      setIsLoading(false)
     }
     catch(error){
       Alert.alert('Login Error', 'Error inesperado.');
+    }
+    finally{
+      setIsLoading(false)
     }
   }
 
@@ -55,7 +57,9 @@ const Login = () => {
         }
       });
       const jwtToken = backendResponse.data
-      console.log('Inicio llamado Get backend')
+      console.log(JSON.stringify(backendResponse.data))
+      //TODO: Aca deberia guardarse el jwt y el refresh token que actualmente solo se devuelve el jwt
+      console.log('Inicio llamado GET backend')
       const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users',{
         headers : {
           'Authorization': jwtToken,
@@ -63,17 +67,19 @@ const Login = () => {
         }
       });
       const authedUserInformation = authedUserInformationResponse.data
+      console.log('Cargado de datos en local storage')
       await AsyncStorage.clear()
-      await AsyncStorage.setItem('@firstname', authedUserInformation.firstname || '');
-      await AsyncStorage.setItem('@lastname', authedUserInformation.lastname  || '');
-      await AsyncStorage.setItem('@email', authedUserInformation.email || '');
-      await AsyncStorage.setItem('@image', authedUserInformation.image || '');
+      await AsyncStorage.setItem(Global.FIRSTNAME, authedUserInformation.firstname || '');
+      await AsyncStorage.setItem(Global.LASTNAME, authedUserInformation.lastname  || '');
+      await AsyncStorage.setItem(Global.EMAIL, authedUserInformation.email || '');
+      await AsyncStorage.setItem(Global.IMAGE, authedUserInformation.image || '');
       await AsyncStorage.setItem('@googleToken', idToken || '');
-      await AsyncStorage.setItem('@sessionToken', jwtToken || '');
+      await AsyncStorage.setItem(Global.JWT_TOKEN, jwtToken || '');
       if (backendResponse.status === 201) {
         console.log('Status 201')
         //navigation.navigate('NewUser') TODO: Para mi sacamos este stack
       } else {
+        setIsLoading(false)
         navigation.dispatch(
           StackActions.replace(Routes.LandingStack)
         );
@@ -84,6 +90,9 @@ const Login = () => {
       } else {
         Alert.alert('Login Error', 'Error inesperado.');
       }
+    }
+    finally{
+      setIsLoading(false)
     }
   };
 
