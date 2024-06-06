@@ -6,14 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { useNavigation } from '@react-navigation/native';
 import COLORS from '../styles/Theme';
 import MovieCard from '../components/atoms/MovieCard';
-import { COLOR } from '../styles/Theme';
+import axios from 'axios';
 
-const movies = [
-  { id: '1', title: 'John Wick 1', image: require('../../assets/images/wick1.jpg') },
-  { id: '2', title: 'John Wick 2', image: require('../../assets/images/wick2.jpg') },
-  { id: '3', title: 'John Wick 3', image: require('../../assets/images/wick3.jpg') },
-  { id: '4', title: 'John Wick 4', image: require('../../assets/images/wick4.jpg') },
-];
 const { width, height } = Dimensions.get('window');
 
 const MovieSearch = () => {
@@ -21,11 +15,22 @@ const MovieSearch = () => {
   const [showLogo, setShowLogo] = useState(true);
   const [showNoResults, setShowNoResults] = useState(false);
   const [showMovies, setShowMovies] = useState(false);
-
+  const [movies, setMovies] = useState([]);
+ 
   const navigation = useNavigation();
 
   useEffect(() => {
-    getMovies(userInput);
+    const timer = setTimeout(() => {
+      if (userInput) {
+        getMovies(userInput);
+      } else {
+        setShowLogo(true);
+        setShowNoResults(false);
+        setShowMovies(false);
+        setMovies([]);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [userInput]);
 
   const getMovies = async (userInput: string) => {
@@ -34,16 +39,21 @@ const MovieSearch = () => {
         setShowLogo(true);
         setShowNoResults(false);
         setShowMovies(false);
+        setMovies([]);
       } else {
-        setShowLogo(false);
-        console.log('traer pelicula');
-        //TODO: make api call to get movies. If results, show movies, else show no results
-        if(true){
+        try {
+          const movies = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${userInput}`);
           setShowMovies(true);
-        } else {
+          setShowLogo(false);
+          setShowNoResults(false);
+          setMovies(movies.data);
+        } catch(error){
           setShowNoResults(true);
+          setShowLogo(false);
+          setShowMovies(false);          
+          setMovies([]);
         }
-      }
+      } 
     } catch (error) {
       console.error('Error al traer las peliculas:', error);
     }
@@ -58,7 +68,7 @@ const MovieSearch = () => {
         <TextInput
           style={movieSearchStyles.input}
           value={userInput}
-          onChangeText={(value) => setUserInput(value)}
+          onChangeText={(userInput) => setUserInput(userInput)}
           placeholder="Ingrese el nombre de una pelicula o actor..."
         />
       </View>
@@ -83,9 +93,9 @@ const MovieSearch = () => {
           <View style={{flex: 18, alignItems:'center'}}>
             <FlatList
               data={movies}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item['id']}
               numColumns={3}
-              renderItem={({ item }) => <MovieCard movie={item} />}
+              renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster'] }} />}
               contentContainerStyle={{gap: height * 0.024 }}
               columnWrapperStyle={{ gap: width * 0.0512 }}
             />

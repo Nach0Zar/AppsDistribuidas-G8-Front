@@ -13,10 +13,11 @@ const movieSearchStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     backgroundColor: COLOR.secondBackground,
+    height: height * 0.071,
   },
   input: {
     flex: 1,
-    height: height * 0.06,
+    height: height * 0.055,
     borderRadius: 20,
     paddingHorizontal: width * 0.04,
     marginHorizontal: width * 0.046,
