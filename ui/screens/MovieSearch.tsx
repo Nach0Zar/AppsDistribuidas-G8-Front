@@ -15,7 +15,7 @@ const MovieSearch = () => {
   const [showLogo, setShowLogo] = useState(true);
   const [showNoResults, setShowNoResults] = useState(false);
   const [showMovies, setShowMovies] = useState(false);
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState<Array<any>>([]);
  
   const navigation = useNavigation();
 
@@ -42,11 +42,19 @@ const MovieSearch = () => {
         setMovies([]);
       } else {
         try {
-          const movies = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${userInput}`);
+          const encodedUserInput = encodeURIComponent(userInput);
+          const movies = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}`);
+
+          if(movies.data.constructor === Array){
+            setMovies(movies.data);
+          } else {
+            let moviesList = []
+            moviesList[0] = movies.data
+            setMovies(moviesList)
+          }
           setShowMovies(true);
           setShowLogo(false);
           setShowNoResults(false);
-          setMovies(movies.data);
         } catch(error){
           setShowNoResults(true);
           setShowLogo(false);
