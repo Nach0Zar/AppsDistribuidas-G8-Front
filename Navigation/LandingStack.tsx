@@ -8,6 +8,7 @@ import { COLOR } from "../ui/styles/Theme";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faHouse, faStar, faUser } from '@fortawesome/free-solid-svg-icons';
 import { faStar as regularStar, faUser as regularUser } from "@fortawesome/free-regular-svg-icons";
+import { Image } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,10 +27,17 @@ const LandingStack = () => {
         options={{
           tabBarLabel: '',
           tabBarIcon: ({focused, color, size}) => (
-            <FontAwesomeIcon 
-              icon={focused ? faHouse : faHouse } 
-              size={24} 
-              color={ COLOR.second }/>
+            focused ? (
+              <Image
+                source={require('../assets/images/house-solid.png')}
+                style={{ width: 24, height: 24, tintColor: COLOR.second }}
+              />
+            ) : (
+              <Image
+                source={require('../assets/images/house.png')}
+                style={{ width: 24, height: 24, tintColor: COLOR.second }}
+              />
+            )
           ),
           tabBarIconStyle: { marginTop: 8, alignSelf: 'center' }
         }}

@@ -16,55 +16,69 @@ const MovieSearch = () => {
   const [showNoResults, setShowNoResults] = useState(false);
   const [showMovies, setShowMovies] = useState(false);
   const [movies, setMovies] = useState<Array<any>>([]);
+  const [page, setPage] = useState(1);
+  const [hasMorePages, setHasMorePages] = useState(true);
  
   const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (userInput) {
-        getMovies(userInput);
+        setPage(1);
+        getMovies(userInput, 1);
       } else {
         setShowLogo(true);
         setShowNoResults(false);
         setShowMovies(false);
         setMovies([]);
+        setHasMorePages(true);
       }
     }, 500);
     return () => clearTimeout(timer);
   }, [userInput]);
 
-  const getMovies = async (userInput: string) => {
-    try {
+  const getMovies = async (userInput: string, page: number) => {
+
       if (userInput.length < 2) {
         setShowLogo(true);
         setShowNoResults(false);
         setShowMovies(false);
         setMovies([]);
-      } else {
+        setHasMorePages(true);
+
+      } 
+      else {  
         try {
           const encodedUserInput = encodeURIComponent(userInput);
-          const movies = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}`);
+          const response = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}&page=${page}`);
+          const movies = response.data
 
-          if(movies.data.constructor === Array){
-            setMovies(movies.data);
-          } else {
+          if(movies.constructor === Array){
+            setMovies((prevMovies) => [...prevMovies, ...movies]);
+            setHasMorePages(true);
+          } 
+          else {
             let moviesList = []
-            moviesList[0] = movies.data
+            moviesList[0] = movies
             setMovies(moviesList)
+            setHasMorePages(false);
           }
+
+          setShowNoResults(false);
           setShowMovies(true);
           setShowLogo(false);
-          setShowNoResults(false);
-        } catch(error){
-          setShowNoResults(true);
-          setShowLogo(false);
-          setShowMovies(false);          
-          setMovies([]);
-        }
+
+        } 
+        catch(error) {
+          setHasMorePages(false);
+
+          if(page === 1 ){
+            setShowNoResults(true);
+            setShowLogo(false);
+            setShowMovies(false);
+          }
+        } 
       } 
-    } catch (error) {
-      console.error('Error al traer las peliculas:', error);
-    }
   };
  
   return (
@@ -106,6 +120,13 @@ const MovieSearch = () => {
               renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster'] }} />}
               contentContainerStyle={{gap: height * 0.024 }}
               columnWrapperStyle={{ gap: width * 0.0512 }}
+              onEndReached={() => {
+                if (userInput && hasMorePages){
+                  setPage((prevPage) => prevPage + 1);
+                  getMovies(userInput, page + 1);
+                }
+              }}
+              onEndReachedThreshold={0.5}
             />
           </View>
       </View>
