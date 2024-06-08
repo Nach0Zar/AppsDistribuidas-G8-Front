@@ -57,7 +57,7 @@ const Login = () => {
     }
   };
   const checkIfLoggedIn = async () => {
-    let googleToken = await AsyncStorage.getItem('@accessToken')
+    let googleToken = await AsyncStorage.getItem('@refreshToken')
     if (googleToken == '' || googleToken == null){
       setLoggedIn(false)
     }
