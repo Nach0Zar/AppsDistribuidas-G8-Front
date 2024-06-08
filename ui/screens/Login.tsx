@@ -25,7 +25,7 @@ const Login = () => {
       const tokens = response.data
       config = {
         headers: {
-          'Authorization': tokens.jwtToken,
+          'Authorization': tokens.jwt,
           'Content-Type': 'application/json'
         }
       };
@@ -37,7 +37,7 @@ const Login = () => {
       await AsyncStorage.setItem('@email', authedUserInformation.email || '');
       await AsyncStorage.setItem('@image', authedUserInformation.image || '');
       await AsyncStorage.setItem('@refreshToken', tokens.refreshToken || '');
-      await AsyncStorage.setItem('@sessionToken', tokens.jwtToken || '');
+      await AsyncStorage.setItem('@sessionToken', tokens.jwt || '');
       // if (response.status === 201) {
       //   setLoggedIn(true);
       //   navigation.navigate('NewUser') TODO: Para mi sacamos este stack
