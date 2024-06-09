@@ -21,7 +21,6 @@ import { refreshToken } from '../../utils/RefreshToken';
 import { Global } from '../../Constants';
 
 
-
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
@@ -35,8 +34,13 @@ export const ProfileInfoScreen = () => {
 
   const navigation = useNavigation();
 
-
   
+  const closeSession = async () => {
+      GoogleSignIn.signOut();
+      await AsyncStorage.clear();
+      navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+  }
+
 
 
   async function handleGoogleLogout() {
@@ -131,10 +135,7 @@ export const ProfileInfoScreen = () => {
         text="Estas seguro que queres cerrar la sesión?"
         actionButton={{
           title: 'Si, cerrar',
-          onPress: () => {
-            handleGoogleLogout()
-            navigation.dispatch(StackActions.replace(Routes.LoginScreen))
-          },
+          onPress: () => closeSession(),
         }}
         closeButton={{
           title: 'Cancelar',

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert, ActivityIndicator } from 'react-native';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { Text, SafeAreaView, TouchableOpacity, Image, View, Alert } from 'react-native';
+import { statusCodes } from '@react-native-google-signin/google-signin';
+import GoogleSignIn from '../asset/GoogleSignIn';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import loginStyles from '../styles/loginStyles';
 import axios from 'axios';
@@ -9,103 +10,86 @@ import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
 import { Global } from '../../Constants';
 
-const GoogleLogin = async () => {
-  await GoogleSignin.hasPlayServices();
-  const userInfo = await GoogleSignin.signIn();
-  return userInfo;
-}
-
-
 const Login = () => {
-  const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    isLoggedIn();
-  }, []);
-
-  const isLoggedIn = async () => {
-    setIsLoading(true)
-    try{
-      const jwt = await AsyncStorage.getItem('@sessionToken');
-      if(jwt != null){
-        console.log('Hay un jwt almacenado: ' + jwt)
-        navigation.dispatch(StackActions.replace(Routes.LandingStack));
-      }
-    }
-    catch(error){
-      Alert.alert('Login Error', 'Error inesperado.');
-    }
-    finally{
-      setIsLoading(false)
-    }
-  }
-
-  
+  const [loggedIn, setLoggedIn] = useState<null | boolean>(null);
   const signIn = async () => {
-    setIsLoading(true)
     try {
-      const googleResponse = await GoogleLogin();
-      const {idToken} = googleResponse;
-      console.log(idToken)
-      console.log('Inicio llamado POST backend')
-      const backendResponse = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, {
+      await GoogleSignIn.signIn();
+      const newTokens = await GoogleSignIn.getTokens();
+      let config = {
         headers: {
-          'Authorization' : idToken,
-          'Content-Type' : 'application/json'
-        }
-      });
-      const jwtToken = backendResponse.data
-      console.log(JSON.stringify(backendResponse.data))
-      //TODO: Aca deberia guardarse el jwt y el refresh token que actualmente solo se devuelve el jwt
-      console.log('Inicio llamado GET backend')
-      const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users',{
-        headers : {
-          'Authorization': jwtToken,
+          'Authorization': newTokens.accessToken,
           'Content-Type': 'application/json'
         }
-      });
+      };
+      console.log(newTokens.accessToken);
+      
+      const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
+      const tokens = response.data
+      config = {
+        headers: {
+          'Authorization': tokens.jwt,
+          'Content-Type': 'application/json'
+        }
+      };
+      
+     console.log(response.status)
+      const authedUserInformationResponse = await axios.get('https://apps-distribuidas-grupo-8.onrender.com/api/users', config);
       const authedUserInformation = authedUserInformationResponse.data
-      console.log('Cargado de datos en local storage')
       await AsyncStorage.clear()
-      await AsyncStorage.setItem(Global.FIRSTNAME, authedUserInformation.firstname || '');
+      await AsyncStorage.setItem(Global.FIRSTNAME, authedUserInformation.firstname || '');//TODO setup in redux
       await AsyncStorage.setItem(Global.LASTNAME, authedUserInformation.lastname  || '');
       await AsyncStorage.setItem(Global.EMAIL, authedUserInformation.email || '');
       await AsyncStorage.setItem(Global.IMAGE, authedUserInformation.image || '');
-      await AsyncStorage.setItem('@googleToken', idToken || '');
-      await AsyncStorage.setItem(Global.JWT_TOKEN, jwtToken || '');
-      if (backendResponse.status === 201) {
-        console.log('Status 201')
-        //navigation.navigate('NewUser') TODO: Para mi sacamos este stack
-      } else {
-        setIsLoading(false)
+      await AsyncStorage.setItem(Global.REFRESH_TOKEN, tokens.refreshToken || '');
+      await AsyncStorage.setItem(Global.NICKNAME, authedUserInformation.nickname  || '');
+      await AsyncStorage.setItem(Global.JWT_TOKEN, tokens.jwt || '');
+      // if (response.status === 201) {
+      //   setLoggedIn(true);
+      //   navigation.navigate('NewUser') TODO: Para mi sacamos este stack
+      // } else {
+        setLoggedIn(true);
         navigation.dispatch(
           StackActions.replace(Routes.LandingStack)
         );
-      }
-    } catch (error : any) {
+      // }
+    } catch (error:any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert('Login cancelado', 'Cancelaste el proceso de login.');
       } else {
         Alert.alert('Login Error', 'Error inesperado.');
       }
-    }
-    finally{
-      setIsLoading(false)
+      setLoggedIn(false);
     }
   };
+  const checkIfLoggedIn = async () => {
+    let googleToken = await AsyncStorage.getItem(Global.REFRESH_TOKEN)
+    if (googleToken == '' || googleToken == null){
+      setLoggedIn(false)
+    }
+    else{
+      await signIn();  
+    }
+  }
+  useEffect(() => {
+    if(loggedIn == null){
+      checkIfLoggedIn();
+    }
+  }, [loggedIn]);
 
+  const navigation = useNavigation();
 
+  
   return (
     <>
+    {(loggedIn == false) && 
       <SafeAreaView style={loginStyles.container}>
         <Image
           style={loginStyles.logo}
           source={require('../../assets/images/logo.png')}
         />
         <Text style={loginStyles.message}>Accede para ver el contenido</Text>
-        {isLoading ? <ActivityIndicator size="small" color="#0000ff" /> : <TouchableOpacity
+        <TouchableOpacity
           onPress={() => signIn()}
           style={loginStyles.googleButton}>
           <View style={{ flexDirection: 'row' }}>
@@ -113,9 +97,7 @@ const Login = () => {
             <Text style={loginStyles.googleButtonText}>Iniciar sesion</Text>
           </View>
         </TouchableOpacity>
-      }
-        
-      </SafeAreaView>
+      </SafeAreaView>}
     </>
   );
 };

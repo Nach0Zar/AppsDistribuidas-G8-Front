@@ -1,5 +1,5 @@
 import {NavigationContainer} from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button,
   Image,
@@ -19,10 +19,11 @@ import { PressableText } from '../components/atoms/PressableText';
 import { useNavigation } from '@react-navigation/native';
 
 
+
 export const EditProfileScreen = () => {
 
-  //TODO: Nombre, apellido e email, tienen que aparecer cargados y no se pueden editar. Solo nickname editable. 
-  //TODO: Accion de guardar nickname cuando click en Guardar
+
+  
 
   const navigation = useNavigation();
 
@@ -32,9 +33,6 @@ export const EditProfileScreen = () => {
         <PressableText text='Cancelar' onPress={() => navigation.goBack()}/>
       </View>
       <ProfileInfo/>
-      <View style={{marginTop: 160, marginBottom: 10, alignItems: 'center'}}>
-        <CustomButton title='Guardar' color={COLOR.black}></CustomButton>
-      </View>
     </ScrollView>
   );
 };
