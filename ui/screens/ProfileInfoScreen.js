@@ -19,45 +19,41 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { refreshToken } from '../../utils/RefreshToken';
 import { Global } from '../../Constants';
+import { getUserData } from '../../utils/UserData';
+import GoogleSignIn from '../asset/GoogleSignIn';
+import { useSelector } from 'react-redux';
 
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
-  const [userData, setUserData] = useState({
-    firstname: '',
-    lastname: '',
-    email: '',
-    nickname: '',
-    image : ''
-  })
+  
+  const { userInfo } = useSelector((state) => state.user);
 
   const navigation = useNavigation();
 
-  
-  const closeSession = async () => {
-      GoogleSignIn.signOut();
-      await AsyncStorage.clear();
-      navigation.dispatch(StackActions.replace(Routes.LoginScreen));
-  }
-
-
-
-  async function handleGoogleLogout() {
+  const handleGoogleLogout = async () => {
     try{
-      await GoogleSignin.signOut();
-      await deleteAccount().then(async response => {
-        if(response.status == 401){
-          await refreshToken().then(async (response) => {
-            await deleteAccount();
-          })        
+      const jwt = await AsyncStorage.getItem(Global.JWT_TOKEN);
+      console.log(jwt)
+      const logOutResponse = await axios.delete(Global.BASE_URL + "/auths", {
+        headers: {
+          "Authorization" : jwt,
+          "Content-Type" : "application/json"
         }
       });
-      
-      await AsyncStorage.clear();
+      if(logOutResponse.status === 200){
+        console.log(logOutResponse.data);
+        GoogleSignIn.signOut();
+        await AsyncStorage.clear();
+        navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+      }
+      else{
+        throw new Error("Ocurrio un error al desloguear usuario: " + logOutResponse.data);
+      }
     }
     catch(error){
-      console.log('Google Sign-Out Error: ', error)
+      Alert.alert("Error", "Ocurrio un error al cerrar la sesión " + error.message)
     }
   }
 
@@ -82,6 +78,7 @@ export const ProfileInfoScreen = () => {
 
   }
 
+  /*
   const getUserData = async () => {
     const firstname = await AsyncStorage.getItem(Global.FIRSTNAME);
     const lastname = await AsyncStorage.getItem(Global.LASTNAME);
@@ -99,26 +96,25 @@ export const ProfileInfoScreen = () => {
 
   useEffect(() =>{  
     getUserData();
-  })
-
-  //TODO: Obtener los datos del usuario, que no esten hardcodeados
+  }, [])
+  */
   return (
     <View style={styles.container}>
       <Image
         style={styles.profileImage}
         source={{
-          uri: userData.image ? userData.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
+          uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
         }}></Image>
 
       <View style={styles.buttonContainer}>
         <View style={styles.textContainer}>
-          <Text style={styles.text}>{userData.firstname} {userData.lastname}</Text>
-          <Text style={styles.text}>{userData.email}</Text>
-          <Text style={styles.text}>{userData.nickname}</Text>
+          <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
+          <Text style={styles.text}>{userInfo?.email}</Text>
+          <Text style={styles.text}>{userInfo?.nickname}</Text>
         </View>
         <CustomButton
           title="Editar"
-          onPress={() => navigation.push(Routes.EditProfile)}
+          onPress={() => navigation.navigate(Routes.EditProfile)}
         />
         <CustomButton
           title="Cerrar Sesión"
@@ -132,10 +128,10 @@ export const ProfileInfoScreen = () => {
       </View>
       <CustomModal
         isVisible={modalLogoutVisible}
-        text="Estas seguro que queres cerrar la sesión?"
+        text="¿Estas seguro que queres cerrar la sesión?"
         actionButton={{
           title: 'Si, cerrar',
-          onPress: () => closeSession(),
+          onPress: () => handleGoogleLogout(),
         }}
         closeButton={{
           title: 'Cancelar',
@@ -144,7 +140,7 @@ export const ProfileInfoScreen = () => {
       />
       <CustomModal
         isVisible={modalDeleteAccVisible}
-        text="Estas seguro que queres eliminar tu cuenta?"
+        text="¿Estas seguro que queres eliminar tu cuenta?"
         actionButton={{
           title: 'Si, eliminar',
           onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)), //TODO: eliminar la cuenta

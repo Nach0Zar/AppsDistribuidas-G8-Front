@@ -36,13 +36,6 @@ interface IErrors {
 
 
 export const ProfileInfo = () => {
-  const [userData, setUserData] = useState({
-    firstname: '',
-    lastname: '',
-    nickname: '',
-    email: '',
-    image: '',
-  });
   const [errors, setErrors] = useState({
     firstnameError: '',
     lastnameError: '',
@@ -51,20 +44,21 @@ export const ProfileInfo = () => {
   const [photo, setPhoto] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
-  const getUserData = async () => {
-    const firstname = (await AsyncStorage.getItem(Global.FIRSTNAME)) ?? '';
-    const lastname = (await AsyncStorage.getItem(Global.LASTNAME)) ?? '';
-    const email = (await AsyncStorage.getItem(Global.EMAIL)) ?? '';
-    const nickname = (await AsyncStorage.getItem(Global.NICKNAME)) ?? '';
-    const image = (await AsyncStorage.getItem(Global.IMAGE)) ?? '';
+  
+
+  const handleChange = (field, value) => {
     setUserData({
-      firstname: firstname,
-      lastname: lastname,
-      nickname: nickname,
-      email: email,
-      image: image,
+        ...userData,
+        [field] : value
     });
-  };
+  }
+
+  const handleSubmit = () => {
+    console.log("Form submitted");
+    //TODO: Send data to backend
+  }
+
+
 
   const validateForm = () => {
     let formIsValid /*: boolean*/ = true;
@@ -113,7 +107,7 @@ export const ProfileInfo = () => {
     return data;
   }
 
-
+  
 
   const onSubmitFormHandler = async (event) => {
     setIsLoading(true);
@@ -124,17 +118,23 @@ export const ProfileInfo = () => {
     try{
         //Actualizar los datos del usuario
         console.log("Ejecutando PUT en /users")
-        //TODO: Sacar el setUserData
-        setUserData({
-            ...userData,
-            lastname: "Marcos",
-            nickname : "manumarcos"
-        })
-        
+
+        //Actualizar datos del usuario
         const updateUserResponse = await axios.post(Global.BASE_URL + '/users', userData, {headers: {
             'Authorization': jwt,
             'Content-Type': 'application/json'
         }});
+
+        if(updateUserResponse.status === 200){
+            console.log(JSON.stringify(updateUserResponse.data))
+            await AsyncStorage.setItem(Global.FIRSTNAME, userData.firstname);
+            await AsyncStorage.setItem(Global.LASTNAME, userData.lastname);
+            await AsyncStorage.setItem(Global.NICKNAME, userData.nickname);
+
+        }
+        else{
+            throw new Error("Ocurrio un error al actualizar los datos de usuario" + updateUserResponse.data);
+        }
         
         //Actualizar la imagen
         if(photo){
@@ -155,14 +155,6 @@ export const ProfileInfo = () => {
                 throw new Error("Ocurrio un error al actualizar imagen" + changePhotoResponse.status)
             }
         }
-
-        if(updateUserResponse.status === 200){
-            console.log(JSON.stringify(updateUserResponse.data))
-        }
-        else{
-            throw new Error("Ocurrio un error al actualizar los datos de usuario" + updateUserResponse.data);
-        }
-        
     }
     catch(error){
         Alert.alert("Ocurrio un error");
@@ -172,17 +164,6 @@ export const ProfileInfo = () => {
         setIsLoading(false);
     }
   }
-
-
-  const handleSave = () => {
-    if (validateForm()) {
-      console.log('Formulario enviado correctamente');
-    } else {
-      console.log('Formulario invalido');
-      console.log(JSON.stringify(userData));
-      console.log(JSON.stringify(errors));
-    }
-  };
 
   const openImagePicker = () => {
     const options = {
@@ -236,12 +217,7 @@ export const ProfileInfo = () => {
       </Pressable>
       <TextInput
         style={styles.textInput}
-        onChangeText={value =>
-          setUserData({
-            ...userData,
-            firstname: value,
-          })
-        }
+        onChangeText={(value) => handleChange("firstname", value)}
         value={userData.firstname}
         placeholder="Nombre"
         placeholderTextColor="grey"
@@ -251,12 +227,7 @@ export const ProfileInfo = () => {
       ) : null}
       <TextInput
         style={styles.textInput}
-        onChangeText={value =>
-          setUserData({
-            ...userData,
-            lastname: value,
-          })
-        }
+        onChangeText={(value) => handleChange("lastname", value)}
         value={userData.lastname}
         placeholder="Apellido"
         placeholderTextColor="grey"
@@ -273,12 +244,7 @@ export const ProfileInfo = () => {
       />
       <TextInput
         style={styles.textInput}
-        onChangeText={value =>
-          setUserData({
-            ...userData,
-            nickname: value,
-          })
-        }
+        onChangeText={(value) => handleChange("nickname", value)}
         value={userData.nickname}
         placeholder="Nickname"
         placeholderTextColor="grey"

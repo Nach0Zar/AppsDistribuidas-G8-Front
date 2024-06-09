@@ -22,9 +22,6 @@ import { useNavigation } from '@react-navigation/native';
 
 export const EditProfileScreen = () => {
 
-
-  
-
   const navigation = useNavigation();
 
   return (
