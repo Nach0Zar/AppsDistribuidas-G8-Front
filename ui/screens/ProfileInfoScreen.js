@@ -28,7 +28,7 @@ export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
   
-  const { userInfo } = useSelector((state) => state.user);
+  const { userInfo } = useSelector((state) => state.auth);
 
   const navigation = useNavigation();
 

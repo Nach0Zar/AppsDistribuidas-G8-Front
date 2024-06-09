@@ -17,6 +17,7 @@ import {Global} from '../../../Constants';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 /*
 interface IUserData {
@@ -43,6 +44,7 @@ export const ProfileInfo = () => {
   });
   const [photo, setPhoto] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const { userInfo } = useSelector((state) => state.auth);
 
   
 
@@ -188,24 +190,17 @@ export const ProfileInfo = () => {
     });
   };
 
-  const getJwt = async () => {
-    const jwt = await AsyncStorage.getItem(Global.JWT_TOKEN);
-    console.log(jwt);
-  }
+ 
 
-  useEffect(() => {
-    getUserData();
-    getJwt();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <Pressable onPress={() => openImagePicker()} style={styles.press}>
-        {userData.image ? (
+        {userInfo.image ? (
           <Image
             style={styles.profileImage}
             source={{
-              uri: userData.image,
+              uri: userInfo.image,
             }}></Image>
         ) : (
           <Image
@@ -218,7 +213,7 @@ export const ProfileInfo = () => {
       <TextInput
         style={styles.textInput}
         onChangeText={(value) => handleChange("firstname", value)}
-        value={userData.firstname}
+        value={userInfo.firstname}
         placeholder="Nombre"
         placeholderTextColor="grey"
       />
@@ -228,7 +223,7 @@ export const ProfileInfo = () => {
       <TextInput
         style={styles.textInput}
         onChangeText={(value) => handleChange("lastname", value)}
-        value={userData.lastname}
+        value={userInfo.lastname}
         placeholder="Apellido"
         placeholderTextColor="grey"
       />
@@ -237,7 +232,7 @@ export const ProfileInfo = () => {
       ) : null}
       <TextInput
         style={styles.textInput}
-        value={userData.email}
+        value={userInfo.email}
         editable={false}
         placeholder="Email"
         placeholderTextColor="grey"
@@ -245,7 +240,7 @@ export const ProfileInfo = () => {
       <TextInput
         style={styles.textInput}
         onChangeText={(value) => handleChange("nickname", value)}
-        value={userData.nickname}
+        value={userInfo.nickname}
         placeholder="Nickname"
         placeholderTextColor="grey"
       />

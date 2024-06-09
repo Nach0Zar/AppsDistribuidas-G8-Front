@@ -17,13 +17,14 @@ import {COLOR} from '../styles/Theme';
 import {ProfileImage} from '../components/atoms/ProfileImage';
 import { PressableText } from '../components/atoms/PressableText';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
 
 
 export const EditProfileScreen = () => {
-
+  
+  
   const navigation = useNavigation();
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>

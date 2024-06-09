@@ -5,6 +5,18 @@ import { userLogin } from "./authActions";
 
 //const userToken = await AsyncStorage.getItem(Global.JWT_TOKEN) ? AsyncStorage.getItem(Global.JWT_TOKEN) : null;
 
+/*
+type UserInfo = {
+    firstname: String,
+    lastname : String,
+    email : String,
+    nickname : String,
+    image : String,
+}
+*/
+
+
+
 const initialState = {
     loading : false,
     userInfo : {},

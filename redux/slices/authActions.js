@@ -33,6 +33,7 @@ export const userLogin = createAsyncThunk(
             }
         }
     }*/
+    //TODO: Mejorar manejo de errores con los try, catch
   async () => {
     console.log('Google Sign In');
     await GoogleSignIn.signIn();
