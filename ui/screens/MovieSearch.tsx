@@ -39,12 +39,13 @@ const MovieSearch = () => {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [userInput]);
+  }, [userInput,releaseSort,qualificationSort]);
 
   const handleSave = (release:string|null,qualification:string|null) => {
     setReleaseSort(release);
     setQualificationSort(qualification);
-    getMovies(userInput,page,release,qualification); 
+    setPage(1);
+    setMovies([]); 
   };
   
   const handleUrl = (release: string|null, qualification: string|null) => {
@@ -72,13 +73,13 @@ const MovieSearch = () => {
       } 
       else {  
         try {
-          console.log(release)
-          console.log(qualification)
+          //console.log(release)
+          //console.log(qualification)
           let url = handleUrl(release,qualification)
           const response = await axios.get(url);
           //console.log(response)
           const movies = response.data
-          console.log(movies)
+          //console.log(movies)
 
           if(movies.constructor === Array){
             setMovies((prevMovies) => [...prevMovies, ...movies]);

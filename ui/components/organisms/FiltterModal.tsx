@@ -35,7 +35,7 @@ export const FiltterModal = (props: Props) => {
     }else{
       setYearUp(true);
       setYearDown(false);
-      setReleaseSort('release.asc');
+      setReleaseSort('release.desc');
     }
   }
 
@@ -46,7 +46,7 @@ export const FiltterModal = (props: Props) => {
     }else{
       setYearDown(true);
       setYearUp(false);
-      setReleaseSort('release.desc');
+      setReleaseSort('release.asc');
     }
   }
 
@@ -57,7 +57,7 @@ export const FiltterModal = (props: Props) => {
     }else{
       setCalificationUp(true);
       setCalificationDown(false);
-      setQualificationSort('qualification.asc');
+      setQualificationSort('qualification.desc');
     }
   }
 
@@ -68,7 +68,7 @@ export const FiltterModal = (props: Props) => {
     }else{
       setCalificationDown(true);
       setCalificationUp(false);
-      setQualificationSort('qualification.desc');
+      setQualificationSort('qualification.asc');
     }
   }
 
