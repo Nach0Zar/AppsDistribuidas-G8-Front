@@ -3,6 +3,7 @@ import {createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 import GoogleSignIn from '../../ui/asset/GoogleSignIn';
 import {Global} from '../../Constants';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export const userLogin = createAsyncThunk(
   'auth/login',
@@ -52,9 +53,6 @@ export const userLogin = createAsyncThunk(
       },
     );
     console.log('Jwt: ' + postAuthResponse.data.jwt);
-    //Guardamos el jwt en Local Storage porque redux si se muere lo perdemos
-    await AsyncStorage.setItem(Global.JWT_TOKEN, postAuthResponse.data.jwt);
-
     console.log('Llamado al back /users GET');
     const getUserResponse = await axios.get(
       Global.BASE_URL + '/users',
@@ -67,9 +65,11 @@ export const userLogin = createAsyncThunk(
     );
     const payload = {
       userToken: postAuthResponse.data.jwt,
+      refreshToken: postAuthResponse.data.refreshToken,
       userData: getUserResponse.data,
     };
 
     return payload;
   },
 );
+

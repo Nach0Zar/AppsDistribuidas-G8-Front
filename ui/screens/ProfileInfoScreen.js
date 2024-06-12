@@ -21,83 +21,79 @@ import { refreshToken } from '../../utils/RefreshToken';
 import { Global } from '../../Constants';
 import { getUserData } from '../../utils/UserData';
 import GoogleSignIn from '../asset/GoogleSignIn';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { userLogOut } from '../../redux/slices/authActions';
+import { logout } from '../../redux/slices/authSlice';
 
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
-  
-  const { userInfo } = useSelector((state) => state.auth);
-
+  const dispatch = useDispatch();
+  const { userInfo, userToken  } = useSelector((state) => state.auth);
   const navigation = useNavigation();
+
+  useEffect( () => {
+    if(userToken == null){
+      navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+    }
+  }, [userToken])
 
   const handleGoogleLogout = async () => {
     try{
-      const jwt = await AsyncStorage.getItem(Global.JWT_TOKEN);
-      console.log(jwt)
-      const logOutResponse = await axios.delete(Global.BASE_URL + "/auths", {
+      console.log('Llamado al back /auths DELETE');
+      console.log(userToken)
+      const response = await axios.delete(Global.BASE_URL + "/auths", {
         headers: {
-          "Authorization" : jwt,
+          "Authorization" : userToken,
           "Content-Type" : "application/json"
         }
       });
-      if(logOutResponse.status === 200){
-        console.log(logOutResponse.data);
-        GoogleSignIn.signOut();
-        await AsyncStorage.clear();
-        navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+      console.log(JSON.stringify(response))
+      if(response.status === 200){
+        await GoogleSignin.signOut();
+        dispatch(logout());
       }
       else{
         throw new Error("Ocurrio un error al desloguear usuario: " + logOutResponse.data);
       }
     }
     catch(error){
-      Alert.alert("Error", "Ocurrio un error al cerrar la sesión " + error.message)
+      if(error.response && error.response.status === 403){
+        await GoogleSignIn.signOut();
+        dispatch(logout());
+      }
+      else{
+        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+      }
     }
   }
 
-  const deleteAccount = async () => {
+  const handleDeleteAccount = async () => {
     try{
-      const jwtToken = await AsyncStorage.getItem(Global.JWT_TOKEN);
-      const response = await axios.delete(Global.BASE_URL + '/auths',{
+      console.log('Llamado al back /users DELETE');
+      const response = await axios.delete(Global.BASE_URL + '/users',{
         headers: {
-          'Authorization' : jwtToken,
+          'Authorization' : userToken,
           'Content-Type' : 'application/json'
         }
       })
-      return response
+      if(response.status === 200){
+        await GoogleSignin.signOut();
+        dispatch(logout());
+      }
     }
     catch(error) {
-      console.log("Ocurrio un error en DELETE /auth " + error)
+      if(error.response && error.response.status === 403){
+        //TODO: Refresh token
+        Alert.alert('Ocurrio un error' , 'Falta implementar refresh token que no funciona actualmente')
+      }
+      else{
+        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+      }
     }
   }
 
-
-  const handleDeleteAccount = async () => {
-
-  }
-
-  /*
-  const getUserData = async () => {
-    const firstname = await AsyncStorage.getItem(Global.FIRSTNAME);
-    const lastname = await AsyncStorage.getItem(Global.LASTNAME);
-    const email = await AsyncStorage.getItem(Global.EMAIL);
-    const nickname = await AsyncStorage.getItem(Global.NICKNAME);
-    const image = await AsyncStorage.getItem(Global.IMAGE);
-    setUserData({
-      firstname: firstname,
-      lastname : lastname,
-      email: email,
-      nickname: nickname,
-      image: image
-    })
-  }
-
-  useEffect(() =>{  
-    getUserData();
-  }, [])
-  */
   return (
     <View style={styles.container}>
       <Image
@@ -143,7 +139,7 @@ export const ProfileInfoScreen = () => {
         text="¿Estas seguro que queres eliminar tu cuenta?"
         actionButton={{
           title: 'Si, eliminar',
-          onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)), //TODO: eliminar la cuenta
+          onPress: () => handleDeleteAccount(),
         }}
         closeButton={{
           title: 'Cancelar',

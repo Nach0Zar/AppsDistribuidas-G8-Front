@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {ProfileImage} from '../atoms/ProfileImage';
-import {COLOR} from '../../styles/Theme';
+import COLORS, {COLOR} from '../../styles/Theme';
 import {CustomButton} from '../atoms/CustomButton';
 import {getUserData} from '../../../utils/UserData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +18,10 @@ import {Global} from '../../../Constants';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {logout, setUserImage, setUserInfo, setUserToken} from '../../../redux/slices/authSlice';
+import { useNavigation } from '@react-navigation/native';
+import { refreshToken } from '../../../utils/RefreshToken';
 
 /*
 interface IUserData {
@@ -35,137 +39,175 @@ interface IErrors {
 }
 */
 
-
 export const ProfileInfo = () => {
-  const [errors, setErrors] = useState({
-    firstnameError: '',
-    lastnameError: '',
-    nicknameError: '',
+  const [firstNameError, setFirstnameError] = useState(false);
+  const [lastnameError, setLastnameError] = useState(false);
+  const [nicknameError, setNicknameError] = useState(false);
+  const [photo, setPhoto] = useState({
+    name: '',
+    type: '',
+    uri: '',
   });
-  const [photo, setPhoto] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const { userInfo } = useSelector((state) => state.auth);
+  const [userData, setUserData] = useState({
+    firstname: '',
+    lastname: '',
+    nickname: '',
+    email: '',
+  });
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {userInfo, userToken, refreshToken} = useSelector(state => state.auth);
 
-  
+  useEffect(() => {
+    setPhoto({...photo, uri: userInfo.image});
+    setUserData(userInfo);
+  }, []);
 
   const handleChange = (field, value) => {
     setUserData({
-        ...userData,
-        [field] : value
+      ...userData,
+      [field]: value,
     });
-  }
-
-  const handleSubmit = () => {
-    console.log("Form submitted");
-    //TODO: Send data to backend
-  }
-
+  };
 
 
   const validateForm = () => {
     let formIsValid /*: boolean*/ = true;
-
+  
     if (userData.firstname == '') {
-      setErrors({
-        ...errors,
-        firstnameError: 'Por favor ingrese un nombre',
-      });
+      setFirstnameError(true)
       console.log('Firstname:' + userData.firstname);
       formIsValid = false;
+    }
+    else{
+      setFirstnameError(false)
     }
     //TODO: Validar que el nombre sean solo letras
 
     if (userData.lastname == '') {
-      setErrors({
-        ...errors,
-        lastnameError: 'Por favor ingrese un apellido',
-      });
+      setLastnameError(true)
       console.log('Lastname:' + userData.lastname);
       formIsValid = false;
+    }else{
+      setLastnameError(false)
     }
     //TODO: Validar que el apellido sean solo letras
 
     if (userData.nickname == '') {
-      setErrors({
-        ...errors,
-        nicknameError: 'Por favor ingrese un nickname',
-      });
+      setNicknameError(true)
       formIsValid = false;
       console.log('Nickname: ' + userData.nickname);
+    }
+    else{
+      setNicknameError(false)
     }
 
     return formIsValid;
   };
 
+  const handleRefreshToken = async () => {
+    try{
+      const refreshTokenResponse = await axios.put(
+        Global.BASE_URL + '/auths',
+        {refreshToken: refreshToken,}
+      );
+      if(refreshTokenResponse.status === 200){
+        console.log(JSON.stringify(refreshTokenResponse));
+        dispatch(setUserToken(refreshTokenResponse))
+      }
+    }catch(error){
+      console.log('Sucedio un error al refrescar: ' + error.message);
+      dispatch(logout());
+    }
+  };
+
 
   //Crea el body necesario para enviar el file
-  const createFormData = (photo) => {
+  const createFormData = photo => {
     const data = new FormData();
     data.append('file', {
-        name: photo.fileName,
-        type : photo.type,
-        uri : Platform.OS === 'android' ? photo.uri : photo.uri.replace('file://', '')
-    })
+      name: photo.fileName,
+      type: photo.type,
+      uri:
+        Platform.OS === 'android'
+          ? photo.uri
+          : photo.uri.replace('file://', ''),
+    });
     return data;
-  }
+  };
 
-  
-
-  const onSubmitFormHandler = async (event) => {
-    setIsLoading(true);
-    const jwt = await AsyncStorage.getItem(Global.JWT_TOKEN);
-    config = {
-        
-    };
-    try{
+  const onSubmitFormHandler = async event => {
+    if (validateForm()) {
+      setIsLoading(true);
+      try {
         //Actualizar los datos del usuario
-        console.log("Ejecutando PUT en /users")
-
+        console.log('Ejecutando PUT en /users');
+        console.log(JSON.stringify(userData));
         //Actualizar datos del usuario
-        const updateUserResponse = await axios.post(Global.BASE_URL + '/users', userData, {headers: {
-            'Authorization': jwt,
-            'Content-Type': 'application/json'
-        }});
+        const updateUserResponse = await axios.post(
+          Global.BASE_URL + '/users',
+          userData,
+          {
+            headers: {
+              Authorization: userToken,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
 
-        if(updateUserResponse.status === 200){
-            console.log(JSON.stringify(updateUserResponse.data))
-            await AsyncStorage.setItem(Global.FIRSTNAME, userData.firstname);
-            await AsyncStorage.setItem(Global.LASTNAME, userData.lastname);
-            await AsyncStorage.setItem(Global.NICKNAME, userData.nickname);
+        if (updateUserResponse.status === 200) {
+          dispatch(setUserInfo(userData));
+        } else {
+          throw new Error(
+            'Ocurrio un error al actualizar los datos de usuario' +
+              updateUserResponse.data,
+          );
+        }
 
-        }
-        else{
-            throw new Error("Ocurrio un error al actualizar los datos de usuario" + updateUserResponse.data);
-        }
-        
         //Actualizar la imagen
-        if(photo){
-            console.log("Ejecutando PUT en /users/images")            
-            configImage = {
-                headers: {
-                  'Authorization': jwt,
-                  'Content-Type': 'multipart/form-data'
-                }
-            };
-            const changePhotoResponse = await axios.put(Global.BASE_URL + '/users/images', createFormData(photo), configImage);
+        if (photo.uri != userInfo.image) {
+          console.log('Ejecutando PUT en /users/images');
+          configImage = {
+            headers: {
+              Authorization: userToken,
+              'Content-Type': 'multipart/form-data',
+            },
+          };
+          const changePhotoResponse = await axios.put(
+            Global.BASE_URL + '/users/images',
+            createFormData(photo),
+            configImage,
+          );
 
-            if(changePhotoResponse.status === 200){
-                console.log(JSON.stringify(changePhotoResponse.data));
-                AsyncStorage.setItem(Global.IMAGE, changePhotoResponse.data)
-            }
-            else{
-                throw new Error("Ocurrio un error al actualizar imagen" + changePhotoResponse.status)
-            }
+          if (changePhotoResponse.status === 200) {
+            dispatch(setUserImage(changePhotoResponse.data));
+          } else {
+            throw new Error(
+              'Ocurrio un error al actualizar imagen' +
+                changePhotoResponse.status,
+            );
+          }
         }
-    }
-    catch(error){
-        Alert.alert("Ocurrio un error");
-        console.log('Error: ' + error.message);
-    }
-    finally{
+
+        navigation.goBack();
+
+      } catch (error) {
+        if (error.response && error.response.status === 403) {
+          //TODO: Arreglar el refresh y refactor
+          console.log('403')
+          handleRefreshToken();
+        } else {
+          Alert.alert(
+            'Ocurrio un error',
+            `Mensaje: ${error.message} \nCodigo de error:  ${error.code}`,
+          );
+        }
+      } finally {
         setIsLoading(false);
+      }
     }
-  }
+  };
 
   const openImagePicker = () => {
     const options = {
@@ -182,25 +224,18 @@ export const ProfileInfo = () => {
       } else {
         let imageUri = response.uri || response.assets?.[0]?.uri;
         setPhoto(response.assets?.[0]);
-        setUserData({
-            ...userData,
-            image : imageUri
-        })
       }
     });
   };
 
- 
-
-
   return (
     <SafeAreaView style={styles.container}>
       <Pressable onPress={() => openImagePicker()} style={styles.press}>
-        {userInfo.image ? (
+        {photo.uri ? (
           <Image
             style={styles.profileImage}
             source={{
-              uri: userInfo.image,
+              uri: photo.uri,
             }}></Image>
         ) : (
           <Image
@@ -212,46 +247,48 @@ export const ProfileInfo = () => {
       </Pressable>
       <TextInput
         style={styles.textInput}
-        onChangeText={(value) => handleChange("firstname", value)}
-        value={userInfo.firstname}
+        onChangeText={value => handleChange('firstname', value)}
+        value={userData.firstname}
         placeholder="Nombre"
         placeholderTextColor="grey"
       />
-      {errors.firstnameError != '' ? (
-        <Text style={styles.errors}>{errors.firstnameError}</Text>
-      ) : null}
+      {firstNameError && 
+        <Text style={styles.errors}>Por favor ingrese un nombre</Text>
+      }
       <TextInput
         style={styles.textInput}
-        onChangeText={(value) => handleChange("lastname", value)}
-        value={userInfo.lastname}
+        onChangeText={value => handleChange('lastname', value)}
+        value={userData.lastname}
         placeholder="Apellido"
         placeholderTextColor="grey"
       />
-      {errors.firstnameError != '' ? (
-        <Text style={styles.errors}>{errors.lastnameError}</Text>
-      ) : null}
+      {lastnameError && 
+        <Text style={styles.errors}>Por favor ingrese un apellido</Text>
+      }
       <TextInput
         style={styles.textInput}
-        value={userInfo.email}
+        value={userData.email}
         editable={false}
         placeholder="Email"
         placeholderTextColor="grey"
       />
       <TextInput
         style={styles.textInput}
-        onChangeText={(value) => handleChange("nickname", value)}
-        value={userInfo.nickname}
+        onChangeText={value => handleChange('nickname', value)}
+        value={userData.nickname}
         placeholder="Nickname"
         placeholderTextColor="grey"
       />
-      {errors.nicknameError != '' ? (
-        <Text style={styles.errors}>{errors.nicknameError}</Text>
-      ) : null}
+      {nicknameError == true && 
+        <Text style={styles.errors}>Por favor ingrese un nickname</Text>
+      }
       <View style={{marginTop: 160, marginBottom: 10, alignItems: 'center'}}>
+        {!isLoading ? 
         <CustomButton
           title="Guardar"
           color={COLOR.black}
-          onPress={onSubmitFormHandler}></CustomButton>
+          onPress={() => onSubmitFormHandler()}></CustomButton>
+          : <ActivityIndicator size="large" color={COLORS.primary} />}
       </View>
     </SafeAreaView>
   );

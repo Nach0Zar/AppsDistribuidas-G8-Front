@@ -19,6 +19,7 @@ import Routes from '../../Navigation/Routes';
 import {Global} from '../../Constants';
 import {useDispatch, useSelector} from 'react-redux';
 import { userLogin } from '../../redux/slices/authActions';
+import { isLoading } from '../../redux/slices/authSlice';
 
 
 const Login = () => {
@@ -28,12 +29,16 @@ const Login = () => {
 
   
   useEffect(() => {
+    dispatch(isLoading(true))
     if (userToken != null){
+      console.log('Hay un token guardado');
       navigation.dispatch(StackActions.replace(Routes.LandingStack));
     }
-  }, [userToken])
+    dispatch(isLoading(false))
+    }, [userToken])
   
 
+  //TODO: Que pasa si falla el Login?
   const onHandleSignIn = () => {
     dispatch(userLogin());
   };
