@@ -110,7 +110,7 @@ export const ProfileInfo = () => {
     try{
       const refreshTokenResponse = await axios.put(
         Global.BASE_URL + '/auths',
-        {refreshToken: refreshToken,}
+        {refreshToken: refreshToken}
       );
       if(refreshTokenResponse.status === 200){
         console.log(JSON.stringify(refreshTokenResponse));
@@ -215,7 +215,6 @@ export const ProfileInfo = () => {
       maxHeight: 2000,
       maxWidth: 2000,
     };
-
     launchImageLibrary(options, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');

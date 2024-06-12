@@ -23,7 +23,7 @@ import { getUserData } from '../../utils/UserData';
 import GoogleSignIn from '../asset/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
 import { userLogOut } from '../../redux/slices/authActions';
-import { logout } from '../../redux/slices/authSlice';
+import { logout, setUserToken } from '../../redux/slices/authSlice';
 
 
 export const ProfileInfoScreen = () => {
@@ -69,6 +69,22 @@ export const ProfileInfoScreen = () => {
     }
   }
 
+  const handleRefreshToken = async () => {
+    try{
+      const refreshTokenResponse = await axios.put(
+        Global.BASE_URL + '/auths',
+        {refreshToken: refreshToken}
+      );
+      if(refreshTokenResponse.status === 200){
+        console.log(JSON.stringify(refreshTokenResponse));
+        dispatch(setUserToken(refreshTokenResponse))
+      }
+    }catch(error){
+      console.log('Sucedio un error al refrescar: ' + error.message);
+      dispatch(logout());
+    }
+  };
+
   const handleDeleteAccount = async () => {
     try{
       console.log('Llamado al back /users DELETE');
@@ -85,8 +101,8 @@ export const ProfileInfoScreen = () => {
     }
     catch(error) {
       if(error.response && error.response.status === 403){
-        //TODO: Refresh token
-        Alert.alert('Ocurrio un error' , 'Falta implementar refresh token que no funciona actualmente')
+        handleRefreshToken();
+        console.log("Hay que refrescar token")
       }
       else{
         Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
