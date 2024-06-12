@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import COLORS from '../styles/Theme';
 import MovieCard from '../components/atoms/MovieCard';
 import axios from 'axios';
+import {FiltterModal} from "../components/organisms/FiltterModal"
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,14 +19,17 @@ const MovieSearch = () => {
   const [movies, setMovies] = useState<Array<any>>([]);
   const [page, setPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
- 
+  const [showFiltter, setShowFiltter] = useState(false);
+  const [releaseSort, setReleaseSort] = useState<string|null>(null);
+  const [qualificationSort, setQualificationSort] = useState<string|null>(null);
+
   const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (userInput) {
         setPage(1);
-        getMovies(userInput, 1);
+        getMovies(userInput, 1,releaseSort,qualificationSort);
       } else {
         setShowLogo(true);
         setShowNoResults(false);
@@ -37,7 +41,26 @@ const MovieSearch = () => {
     return () => clearTimeout(timer);
   }, [userInput]);
 
-  const getMovies = async (userInput: string, page: number) => {
+  const handleSave = (release:string|null,qualification:string|null) => {
+    setReleaseSort(release);
+    setQualificationSort(qualification);
+    getMovies(userInput,page,release,qualification); 
+  };
+  
+  const handleUrl = (release: string|null, qualification: string|null) => {
+    const encodedUserInput = encodeURIComponent(userInput);
+    let url = `https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}&page=${page}`
+
+    if(release){
+      url += `&release_sort=${release}`;
+    }
+    if(qualification){
+      url += `&qualification_sort=${qualification}`;
+    }
+    return url;
+  }
+
+  const getMovies = async (userInput: string, page: number, release: string|null, qualification: string|null) => {
 
       if (userInput.length < 2) {
         setShowLogo(true);
@@ -49,9 +72,13 @@ const MovieSearch = () => {
       } 
       else {  
         try {
-          const encodedUserInput = encodeURIComponent(userInput);
-          const response = await axios.get(`https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}&page=${page}`);
+          console.log(release)
+          console.log(qualification)
+          let url = handleUrl(release,qualification)
+          const response = await axios.get(url);
+          //console.log(response)
           const movies = response.data
+          console.log(movies)
 
           if(movies.constructor === Array){
             setMovies((prevMovies) => [...prevMovies, ...movies]);
@@ -110,7 +137,9 @@ const MovieSearch = () => {
         <View style={{flex:1}}>
           <View style={movieSearchStyles.title}>
               <Text style={movieSearchStyles.titleText}>Resultados encontrados</Text>
-              <FontAwesomeIcon icon={faFilter} size={24} color={COLORS.white}/>
+              <TouchableOpacity onPress={() => setShowFiltter(true)}>
+                <FontAwesomeIcon icon={faFilter} size={24} color={COLORS.white}/>
+              </TouchableOpacity>
           </View>
           <View style={{flex: 18, alignItems:'center'}}>
             <FlatList
@@ -123,12 +152,23 @@ const MovieSearch = () => {
               onEndReached={() => {
                 if (userInput && hasMorePages){
                   setPage((prevPage) => prevPage + 1);
-                  getMovies(userInput, page + 1);
+                  getMovies(userInput, page + 1,releaseSort,qualificationSort);
                 }
               }}
               onEndReachedThreshold={0.5}
             />
           </View>
+          <FiltterModal
+            isVisible={showFiltter}
+            onSave={handleSave}
+            actionButton={{
+              onPress: () => setShowFiltter(false)
+            }}
+            closeButton={{
+              close: () => setShowFiltter(false)
+            }}
+            >  
+          </FiltterModal>
       </View>
       )}
     </SafeAreaView>
