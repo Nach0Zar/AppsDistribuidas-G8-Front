@@ -74,7 +74,6 @@ const MovieSearch = () => {
       else {  
         try {
           let url = handleUrl(page, release,qualification)
-          console.log(url)
           let connectionStatus = await ConnectionStatus()
           if(!connectionStatus){
             navigation.dispatch(StackActions.replace(Routes.InternetError));

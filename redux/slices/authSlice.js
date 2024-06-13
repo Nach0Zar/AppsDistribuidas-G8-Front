@@ -48,21 +48,16 @@ const authSlice = createSlice({
         .addCase(userLogin.pending, (state) =>{
             state.loading = true
             state.error = null
-            console.log("PENDING")
         })
         .addCase(userLogin.fulfilled, (state, {payload}) => {
             state.loading = false
             state.userInfo = payload.userData
             state.userToken = payload.userToken
             state.refreshToken = payload.refreshToken
-            console.log('Jwt: ' + payload.userToken)
-            console.log('RefreshToken: ' + payload.refreshToken)
-            console.log("FULFILLED")
         })
         .addCase(userLogin.rejected, (state, {payload}) => {
             state.loading = false
             state.error = payload
-            console.log("REJECTED: " + payload)
         })
     }
 })

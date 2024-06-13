@@ -59,7 +59,6 @@ export const ProfileInfo = () => {
   
     if (userData.firstname == '') {
       setFirstnameError(true)
-      console.log('Firstname:' + userData.firstname);
       formIsValid = false;
     }
     else{
@@ -69,7 +68,6 @@ export const ProfileInfo = () => {
 
     if (userData.lastname == '') {
       setLastnameError(true)
-      console.log('Lastname:' + userData.lastname);
       formIsValid = false;
     }else{
       setLastnameError(false)
@@ -79,7 +77,6 @@ export const ProfileInfo = () => {
     if (userData.nickname == '') {
       setNicknameError(true)
       formIsValid = false;
-      console.log('Nickname: ' + userData.nickname);
     }
     else{
       setNicknameError(false)
@@ -98,11 +95,9 @@ export const ProfileInfo = () => {
         }}
       );
       if(refreshTokenResponse.status === 200){
-        console.log(JSON.stringify(refreshTokenResponse));
         dispatch(setUserToken(refreshTokenResponse))
       }
     }catch(error){
-      console.log('Sucedio un error al refrescar: ' + error.message);
       dispatch(logout());
     }
   };
@@ -185,7 +180,6 @@ export const ProfileInfo = () => {
       } catch (error) {
         if (error.response && error.response.status === 403) {
           //TODO: Arreglar el refresh y refactor
-          console.log('403')
           handleRefreshToken();
         } else {
           Alert.alert(

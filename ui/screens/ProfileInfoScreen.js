@@ -45,7 +45,6 @@ export const ProfileInfoScreen = () => {
           "Content-Type" : "application/json"
         }
       });
-      console.log(JSON.stringify(response))
       if(response.status === 200){
         await GoogleSignin.signOut();
         dispatch(logout());
@@ -79,11 +78,9 @@ export const ProfileInfoScreen = () => {
         }}
       );
       if(refreshTokenResponse.status === 200){
-        console.log(JSON.stringify(refreshTokenResponse));
         dispatch(setUserToken(refreshTokenResponse))
       }
     }catch(error){
-      console.log('Sucedio un error al refrescar: ' + error.message);
       dispatch(logout());
     }
   };
@@ -108,7 +105,6 @@ export const ProfileInfoScreen = () => {
     catch(error) {
       if(error.response && error.response.status === 403){
         handleRefreshToken();
-        console.log("Hay que refrescar token")
       }
       else{
         Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
