@@ -36,7 +36,6 @@ export const ProfileInfoScreen = () => {
     }
   }, [userToken, error])
   const loadProfileInfo = async () => {
-    console.log("?")
     navigation.dispatch(StackActions.replace(Routes.ProfileInfo))
   }
   const handleGoogleLogout = async () => {
