@@ -19,9 +19,12 @@ import GoogleSignIn from '../assets/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
 import ConnectionStatus from '../assets/ConnectionStatus';
+import InternalError from './errors/InternalError';
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
   const dispatch = useDispatch();
   const { userInfo, userToken, refreshToken  } = useSelector((state) => state.auth);
@@ -31,8 +34,11 @@ export const ProfileInfoScreen = () => {
     if(userToken == null){
       navigation.dispatch(StackActions.replace(Routes.LoginScreen));
     }
-  }, [userToken])
-
+  }, [userToken, error])
+  const loadProfileInfo = async () => {
+    console.log("?")
+    navigation.dispatch(StackActions.replace(Routes.ProfileInfo))
+  }
   const handleGoogleLogout = async () => {
     try{
       let connectionStatus = await ConnectionStatus()
@@ -50,7 +56,7 @@ export const ProfileInfoScreen = () => {
         dispatch(logout());
       }
       else{
-        throw new Error("Ocurrio un error al desloguear usuario: " + logOutResponse.data);
+        throw new Error("Ocurrio un error al desloguear usuario: " + response.data);
       }
     }
     catch(error){
@@ -59,7 +65,8 @@ export const ProfileInfoScreen = () => {
         dispatch(logout());
       }
       else{
-        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+        setError(true)
+        setErrorMessage(`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
       }
     }
   }
@@ -107,64 +114,69 @@ export const ProfileInfoScreen = () => {
         handleRefreshToken();
       }
       else{
-        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+        setError(true)
+        setErrorMessage(`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
       }
     }
   }
 
-  return (
-    <View style={styles.container}>
-      <Image
-        style={styles.profileImage}
-        source={{
-          uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
-        }}></Image>
+  return (<View style={styles.container}>
+    {(!error) ? <>
+    <Image
+      style={styles.profileImage}
+      source={{
+        uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
+      }}></Image>
 
-      <View style={styles.buttonContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
-          <Text style={styles.text}>{userInfo?.email}</Text>
-          <Text style={styles.text}>{userInfo?.nickname}</Text>
-        </View>
-        <CustomButton
-          title="Editar"
-          onPress={() => navigation.navigate(Routes.EditProfile)}
-        />
-        <CustomButton
-          title="Cerrar Sesión"
-          onPress={() => setModalLogoutVisible(true)}
-        />
-        <CustomButton
-          title="Eliminar Cuenta"
-          backgroundColor={COLOR.warning}
-          onPress={() => setModalDeleteAccVisible(true)}
-        />
+    <View style={styles.buttonContainer}>
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
+        <Text style={styles.text}>{userInfo?.email}</Text>
+        <Text style={styles.text}>{userInfo?.nickname}</Text>
       </View>
-      <CustomModal
-        isVisible={modalLogoutVisible}
-        text="¿Estas seguro que queres cerrar la sesión?"
-        actionButton={{
-          title: 'Si, cerrar',
-          onPress: () => handleGoogleLogout(),
-        }}
-        closeButton={{
-          title: 'Cancelar',
-          close: () => setModalLogoutVisible(false),
-        }}
+      <CustomButton
+        title="Editar"
+        onPress={() => navigation.navigate(Routes.EditProfile)}
       />
-      <CustomModal
-        isVisible={modalDeleteAccVisible}
-        text="¿Estas seguro que queres eliminar tu cuenta?"
-        actionButton={{
-          title: 'Si, eliminar',
-          onPress: () => handleDeleteAccount(),
-        }}
-        closeButton={{
-          title: 'Cancelar',
-          close: () => setModalDeleteAccVisible(false),
-        }}
+      <CustomButton
+        title="Cerrar Sesión"
+        onPress={() => setModalLogoutVisible(true)}
+      />
+      <CustomButton
+        title="Eliminar Cuenta"
+        backgroundColor={COLOR.warning}
+        onPress={() => setModalDeleteAccVisible(true)}
       />
     </View>
+    <CustomModal
+      isVisible={modalLogoutVisible}
+      text="¿Estas seguro que queres cerrar la sesión?"
+      actionButton={{
+        title: 'Si, cerrar',
+        onPress: () => handleGoogleLogout(),
+      }}
+      closeButton={{
+        title: 'Cancelar',
+        close: () => setModalLogoutVisible(false),
+      }}
+    />
+    <CustomModal
+      isVisible={modalDeleteAccVisible}
+      text="¿Estas seguro que queres eliminar tu cuenta?"
+      actionButton={{
+        title: 'Si, eliminar',
+        onPress: () => handleDeleteAccount(),
+      }}
+      closeButton={{
+        title: 'Cancelar',
+        close: () => setModalDeleteAccVisible(false),
+      }}
+    /></>
+   : 
+   <InternalError onButtonClick={loadProfileInfo}/>
+   }
+   </View>
+    
   );
 };
 
