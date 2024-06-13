@@ -160,7 +160,7 @@ export const ProfileInfo = () => {
             },
           };
           
-          let connectionStatus = await ConnectionStatus()
+          connectionStatus = await ConnectionStatus()
           if(!connectionStatus){
             navigation.dispatch(StackActions.replace(Routes.InternetError));
           }
@@ -188,10 +188,7 @@ export const ProfileInfo = () => {
           console.log('403')
           handleRefreshToken();
         } else {
-          Alert.alert(
-            'Ocurrio un error',
-            `Mensaje: ${error.message} \nCodigo de error:  ${error.code}`,
-          );
+          navigation.dispatch(StackActions.replace(Routes.ServerError));
         }
       } finally {
         setIsLoading(false);
