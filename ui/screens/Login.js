@@ -14,7 +14,7 @@ import Routes from '../../Navigation/Routes';
 import {useDispatch, useSelector} from 'react-redux';
 import { userLogin } from '../../redux/slices/authActions';
 import { isLoading } from '../../redux/slices/authSlice';
-
+import ConnectionStatus from '../assets/ConnectionStatus';
 
 const Login = () => {
   const {loading, userToken, error} = useSelector(state => state.auth);
@@ -31,7 +31,16 @@ const Login = () => {
     }, [userToken])
   
   const onHandleSignIn = () => {
-    dispatch(userLogin());
+    ConnectionStatus().then(()=> {
+      try{
+        dispatch(userLogin());
+      }
+      catch{
+        navigation.dispatch(StackActions.replace(Routes.ServerError));
+      }
+    }).catch(()=>{
+      navigation.dispatch(StackActions.replace(Routes.InternetError));
+    })
   };
 
 
