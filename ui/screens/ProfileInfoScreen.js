@@ -9,43 +9,127 @@ import {
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import {CustomButton} from '../components/atoms/CustomButton';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {CustomModal} from '../components/organisms/CustomModal';
 import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { refreshToken } from '../../utils/RefreshToken';
+import { Global } from '../../Constants';
+import { getUserData } from '../../utils/UserData';
 import GoogleSignIn from '../asset/GoogleSignIn';
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useDispatch, useSelector } from 'react-redux';
+import { userLogOut } from '../../redux/slices/authActions';
+import { logout, setUserToken } from '../../redux/slices/authSlice';
+
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
-
+  const dispatch = useDispatch();
+  const { userInfo, userToken, refreshToken  } = useSelector((state) => state.auth);
   const navigation = useNavigation();
-  const closeSession = async () => {
-      GoogleSignIn.signOut();
-      await AsyncStorage.clear();
+
+  useEffect( () => {
+    if(userToken == null){
       navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+    }
+  }, [userToken])
+
+  const handleGoogleLogout = async () => {
+    try{
+      console.log('Llamado al back /auths DELETE');
+      console.log(userToken)
+      const response = await axios.delete(Global.BASE_URL + "/auths", {
+        headers: {
+          "Authorization" : userToken,
+          "Content-Type" : "application/json"
+        }
+      });
+      console.log(JSON.stringify(response))
+      if(response.status === 200){
+        await GoogleSignin.signOut();
+        dispatch(logout());
+      }
+      else{
+        throw new Error("Ocurrio un error al desloguear usuario: " + logOutResponse.data);
+      }
+    }
+    catch(error){
+      if(error.response && error.response.status === 403){
+        await GoogleSignIn.signOut();
+        dispatch(logout());
+      }
+      else{
+        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+      }
+    }
   }
 
-  //TODO: Obtener los datos del usuario, que no esten hardcodeados
+  const handleRefreshToken = async () => {
+    try{
+      const refreshTokenResponse = await axios.put(
+        Global.BASE_URL + '/auths',{
+        headers: {
+          "Authorization" : refreshToken,
+          "Content-Type" : "application/json"
+        }}
+      );
+      if(refreshTokenResponse.status === 200){
+        console.log(JSON.stringify(refreshTokenResponse));
+        dispatch(setUserToken(refreshTokenResponse))
+      }
+    }catch(error){
+      console.log('Sucedio un error al refrescar: ' + error.message);
+      dispatch(logout());
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try{
+      console.log('Llamado al back /users DELETE');
+      const response = await axios.delete(Global.BASE_URL + '/users',{
+        headers: {
+          'Authorization' : userToken,
+          'Content-Type' : 'application/json'
+        }
+      })
+      if(response.status === 200){
+        await GoogleSignin.signOut();
+        dispatch(logout());
+      }
+    }
+    catch(error) {
+      if(error.response && error.response.status === 403){
+        handleRefreshToken();
+        console.log("Hay que refrescar token")
+      }
+      else{
+        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Image
         style={styles.profileImage}
         source={{
-          uri: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+          uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
         }}></Image>
 
       <View style={styles.buttonContainer}>
         <View style={styles.textContainer}>
-          <Text style={styles.text}>Juan Gutierrez</Text>
-          <Text style={styles.text}>juangutierrez@gmail.com</Text>
-          <Text style={styles.text}>juani94</Text>
+          <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
+          <Text style={styles.text}>{userInfo?.email}</Text>
+          <Text style={styles.text}>{userInfo?.nickname}</Text>
         </View>
         <CustomButton
           title="Editar"
-          onPress={() => navigation.push(Routes.EditProfile)}
+          onPress={() => navigation.navigate(Routes.EditProfile)}
         />
         <CustomButton
           title="Cerrar Sesión"
@@ -59,10 +143,10 @@ export const ProfileInfoScreen = () => {
       </View>
       <CustomModal
         isVisible={modalLogoutVisible}
-        text="Estas seguro que queres cerrar la sesión?"
+        text="¿Estas seguro que queres cerrar la sesión?"
         actionButton={{
           title: 'Si, cerrar',
-          onPress: () => closeSession(),
+          onPress: () => handleGoogleLogout(),
         }}
         closeButton={{
           title: 'Cancelar',
@@ -71,10 +155,10 @@ export const ProfileInfoScreen = () => {
       />
       <CustomModal
         isVisible={modalDeleteAccVisible}
-        text="Estas seguro que queres eliminar tu cuenta?"
+        text="¿Estas seguro que queres eliminar tu cuenta?"
         actionButton={{
           title: 'Si, eliminar',
-          onPress: () => navigation.dispatch(StackActions.replace(Routes.LoginScreen)), //TODO: eliminar la cuenta
+          onPress: () => handleDeleteAccount(),
         }}
         closeButton={{
           title: 'Cancelar',
@@ -90,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.primaryBackground,
     flexDirection: 'column',
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   profileImage: {
     height: 150,
@@ -102,15 +186,18 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 42,
     marginBottom: 60,
+  
   },
   text: {
     fontFamily: '',
     color: COLOR.second,
     fontSize: 18,
-    fontWeight: 'medium',
+    fontWeight: 'medium'
   },
   buttonContainer: {
     gap: 10,
+    alignItems: 'center',
+    maxWidth: '70%'
   },
   modalView: {
     margin: 20,

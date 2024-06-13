@@ -13,9 +13,9 @@ type Props = {
 
 export const CustomButton = (props : Props) => {
     return(
-        <TouchableHighlight style={[styles.button, {...props}]} onPress={props.onPress}>
+        <TouchableOpacity style={[styles.button, {...props}]} onPress={props.onPress}>
             <Text style={[styles.text,{...props}]}>{props.title}</Text>
-        </TouchableHighlight>
+        </TouchableOpacity>
     )
 }
 
