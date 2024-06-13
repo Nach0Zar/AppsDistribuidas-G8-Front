@@ -22,6 +22,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {logout, setUserImage, setUserInfo, setUserToken} from '../../../redux/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
 import { refreshToken } from '../../../utils/RefreshToken';
+import { ErrorMessage } from '../atoms/ErrorMessage';
 
 /*
 interface IUserData {
@@ -109,8 +110,11 @@ export const ProfileInfo = () => {
   const handleRefreshToken = async () => {
     try{
       const refreshTokenResponse = await axios.put(
-        Global.BASE_URL + '/auths',
-        {refreshToken: refreshToken}
+        Global.BASE_URL + '/auths',{
+        headers: {
+          "Authorization" : refreshToken,
+          "Content-Type" : "application/json"
+        }}
       );
       if(refreshTokenResponse.status === 200){
         console.log(JSON.stringify(refreshTokenResponse));
@@ -252,7 +256,7 @@ export const ProfileInfo = () => {
         placeholderTextColor="grey"
       />
       {firstNameError && 
-        <Text style={styles.errors}>Por favor ingrese un nombre</Text>
+        <ErrorMessage message = "Por favor ingrese un nombre"></ErrorMessage>
       }
       <TextInput
         style={styles.textInput}
@@ -262,7 +266,7 @@ export const ProfileInfo = () => {
         placeholderTextColor="grey"
       />
       {lastnameError && 
-        <Text style={styles.errors}>Por favor ingrese un apellido</Text>
+        <ErrorMessage message = "Por favor ingrese un apellido"></ErrorMessage>
       }
       <TextInput
         style={styles.textInput}
@@ -279,7 +283,7 @@ export const ProfileInfo = () => {
         placeholderTextColor="grey"
       />
       {nicknameError == true && 
-        <Text style={styles.errors}>Por favor ingrese un nickname</Text>
+        <ErrorMessage message = "Por favor ingrese un nickname"></ErrorMessage>
       }
       <View style={{marginTop: 160, marginBottom: 10, alignItems: 'center'}}>
         {!isLoading ? 
@@ -326,5 +330,6 @@ const styles = StyleSheet.create({
   },
   errors: {
     color: 'red',
+    alignItems : 'flex-start'
   },
 });

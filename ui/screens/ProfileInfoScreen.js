@@ -30,7 +30,7 @@ export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
   const dispatch = useDispatch();
-  const { userInfo, userToken  } = useSelector((state) => state.auth);
+  const { userInfo, userToken, refreshToken  } = useSelector((state) => state.auth);
   const navigation = useNavigation();
 
   useEffect( () => {
@@ -72,8 +72,11 @@ export const ProfileInfoScreen = () => {
   const handleRefreshToken = async () => {
     try{
       const refreshTokenResponse = await axios.put(
-        Global.BASE_URL + '/auths',
-        {refreshToken: refreshToken}
+        Global.BASE_URL + '/auths',{
+        headers: {
+          "Authorization" : refreshToken,
+          "Content-Type" : "application/json"
+        }}
       );
       if(refreshTokenResponse.status === 200){
         console.log(JSON.stringify(refreshTokenResponse));
