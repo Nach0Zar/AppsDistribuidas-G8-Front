@@ -1,8 +1,6 @@
 import {
   Alert,
   Image,
-  Modal,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -15,14 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import { StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { refreshToken } from '../../utils/RefreshToken';
 import { Global } from '../../Constants';
-import { getUserData } from '../../utils/UserData';
 import GoogleSignIn from '../asset/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
-import { userLogOut } from '../../redux/slices/authActions';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
 
 

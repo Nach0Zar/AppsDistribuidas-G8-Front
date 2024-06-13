@@ -1,21 +1,5 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Global } from "../../Constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { userLogOut, userLogin } from "./authActions";
-
-//const userToken = await AsyncStorage.getItem(Global.JWT_TOKEN) ? AsyncStorage.getItem(Global.JWT_TOKEN) : null;
-
-/*
-type UserInfo = {
-    firstname: String,
-    lastname : String,
-    email : String,
-    nickname : String,
-    image : String,
-}
-*/
-
-//const userToken = await AsyncStorage.getItem(Global.JWT_TOKEN) ?  await AsyncStorage.getItem(Global.JWT_TOKEN) : null;
+import { createSlice } from "@reduxjs/toolkit";
+import { userLogin } from "./authActions";
 
 const initialState = {
     loading : false,

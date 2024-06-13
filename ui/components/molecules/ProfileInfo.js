@@ -4,16 +4,12 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {ProfileImage} from '../atoms/ProfileImage';
 import COLORS, {COLOR} from '../../styles/Theme';
 import {CustomButton} from '../atoms/CustomButton';
-import {getUserData} from '../../../utils/UserData';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Global} from '../../../Constants';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -21,24 +17,7 @@ import axios from 'axios';
 import {useDispatch, useSelector} from 'react-redux';
 import {logout, setUserImage, setUserInfo, setUserToken} from '../../../redux/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
-import { refreshToken } from '../../../utils/RefreshToken';
 import { ErrorMessage } from '../atoms/ErrorMessage';
-
-/*
-interface IUserData {
-    firstname : string,
-    lastname : string,
-    nickname : string,
-    email : string,
-    image : string
-}
-
-interface IErrors {
-    firstnameError : string,
-    lastnameError : string,
-    nicknameError : string
-}
-*/
 
 export const ProfileInfo = () => {
   const [firstNameError, setFirstnameError] = useState(false);
