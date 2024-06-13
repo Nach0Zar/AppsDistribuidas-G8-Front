@@ -1,25 +1,15 @@
-import {NavigationContainer} from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
-  Button,
-  Image,
-  Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableHighlight,
   View,
 } from 'react-native';
 import {ProfileInfo} from '../components/molecules/ProfileInfo';
-import {CustomButton} from '../components/atoms/CustomButton';
 import {COLOR} from '../styles/Theme';
-import {ProfileImage} from '../components/atoms/ProfileImage';
 import { PressableText } from '../components/atoms/PressableText';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-
-
+import { StackActions } from '@react-navigation/native';
+import Routes from '../../Navigation/Routes';
 
 export const EditProfileScreen = () => {
   
@@ -28,7 +18,7 @@ export const EditProfileScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <PressableText text='Cancelar' onPress={() => navigation.goBack()}/>
+        <PressableText text='Cancelar' onPress={() => navigation.dispatch(StackActions.replace(Routes.ProfileInfo))}/>
       </View>
       <ProfileInfo/>
     </ScrollView>
