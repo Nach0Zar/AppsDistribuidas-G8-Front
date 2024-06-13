@@ -188,7 +188,10 @@ export const ProfileInfo = () => {
           console.log('403')
           handleRefreshToken();
         } else {
-          navigation.dispatch(StackActions.replace(Routes.ServerError));
+          Alert.alert(
+            'Ocurrio un error',
+            `Mensaje: ${error.message} \nCodigo de error:  ${error.code}`,
+          );
         }
       } finally {
         setIsLoading(false);
