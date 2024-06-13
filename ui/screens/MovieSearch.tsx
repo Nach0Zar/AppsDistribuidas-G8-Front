@@ -18,7 +18,7 @@ const MovieSearch = () => {
   const [showMovies, setShowMovies] = useState(false);
   const [movies, setMovies] = useState<Array<any>>([]);
   const [page, setPage] = useState(1);
-  const [hasMorePages, setHasMorePages] = useState(true);
+  const [hasMorePages, setHasMorePages] = useState(false);
   const [showFiltter, setShowFiltter] = useState(false);
   const [releaseSort, setReleaseSort] = useState<string|null>(null);
   const [qualificationSort, setQualificationSort] = useState<string|null>(null);
@@ -29,6 +29,7 @@ const MovieSearch = () => {
     const timer = setTimeout(() => {
       if (userInput) {
         setPage(1);
+        setMovies([]);
         getMovies(userInput, 1,releaseSort,qualificationSort);
       } else {
         setShowLogo(true);
@@ -47,11 +48,9 @@ const MovieSearch = () => {
     setPage(1);
     setMovies([]); 
   };
-  
-  const handleUrl = (release: string|null, qualification: string|null) => {
+  const handleUrl = (page: number, release: string|null, qualification: string|null) => {
     const encodedUserInput = encodeURIComponent(userInput);
     let url = `https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}&page=${page}`
-
     if(release){
       url += `&release_sort=${release}`;
     }
@@ -68,22 +67,15 @@ const MovieSearch = () => {
         setShowNoResults(false);
         setShowMovies(false);
         setMovies([]);
-        setHasMorePages(true);
-
       } 
       else {  
         try {
-          //console.log(release)
-          //console.log(qualification)
-          let url = handleUrl(release,qualification)
+          let url = handleUrl(page, release,qualification)
           const response = await axios.get(url);
-          //console.log(response)
           const movies = response.data
-          //console.log(movies)
-
           if(movies.constructor === Array){
             setMovies((prevMovies) => [...prevMovies, ...movies]);
-            setHasMorePages(true);
+            setHasMorePages(movies.length == 20);
           } 
           else {
             let moviesList = []
@@ -91,15 +83,12 @@ const MovieSearch = () => {
             setMovies(moviesList)
             setHasMorePages(false);
           }
-
           setShowNoResults(false);
           setShowMovies(true);
           setShowLogo(false);
-
         } 
         catch(error) {
           setHasMorePages(false);
-
           if(page === 1 ){
             setShowNoResults(true);
             setShowLogo(false);
@@ -147,7 +136,7 @@ const MovieSearch = () => {
               data={movies}
               keyExtractor={(item) => item['id']}
               numColumns={3}
-              renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster'] }} />}
+              renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster']}} />}
               contentContainerStyle={{gap: height * 0.024 }}
               columnWrapperStyle={{ gap: width * 0.0512 }}
               onEndReached={() => {
