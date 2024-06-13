@@ -18,6 +18,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {logout, setUserImage, setUserInfo, setUserToken} from '../../../redux/slices/authSlice';
 import { useNavigation } from '@react-navigation/native';
 import { ErrorMessage } from '../atoms/ErrorMessage';
+import ConnectionStatus from '../../assets/ConnectionStatus';
+import Routes from '../../../Navigation/Routes';
 
 export const ProfileInfo = () => {
   const [firstNameError, setFirstnameError] = useState(false);
@@ -124,9 +126,10 @@ export const ProfileInfo = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        //Actualizar los datos del usuario
-        console.log('Ejecutando PUT en /users');
-        console.log(JSON.stringify(userData));
+        let connectionStatus = await ConnectionStatus()
+        if(!connectionStatus){
+          navigation.dispatch(StackActions.replace(Routes.InternetError));
+        }
         //Actualizar datos del usuario
         const updateUserResponse = await axios.post(
           Global.BASE_URL + '/users',
@@ -150,13 +153,17 @@ export const ProfileInfo = () => {
 
         //Actualizar la imagen
         if (photo.uri != userInfo.image) {
-          console.log('Ejecutando PUT en /users/images');
           configImage = {
             headers: {
               Authorization: userToken,
               'Content-Type': 'multipart/form-data',
             },
           };
+          
+          let connectionStatus = await ConnectionStatus()
+          if(!connectionStatus){
+            navigation.dispatch(StackActions.replace(Routes.InternetError));
+          }
           const changePhotoResponse = await axios.put(
             Global.BASE_URL + '/users/images',
             createFormData(photo),
