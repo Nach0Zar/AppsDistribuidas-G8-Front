@@ -32,12 +32,7 @@ const Login = () => {
   
   const onHandleSignIn = () => {
     ConnectionStatus().then(()=> {
-      try{
         dispatch(userLogin());
-      }
-      catch{
-        navigation.dispatch(StackActions.replace(Routes.ServerError));
-      }
     }).catch(()=>{
       navigation.dispatch(StackActions.replace(Routes.InternetError));
     })
