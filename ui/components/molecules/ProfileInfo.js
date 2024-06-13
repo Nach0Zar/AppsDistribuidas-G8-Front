@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -16,10 +15,11 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import axios from 'axios';
 import {useDispatch, useSelector} from 'react-redux';
 import {logout, setUserImage, setUserInfo, setUserToken} from '../../../redux/slices/authSlice';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, StackActions } from '@react-navigation/native';
 import { ErrorMessage } from '../atoms/ErrorMessage';
 import ConnectionStatus from '../../assets/ConnectionStatus';
 import Routes from '../../../Navigation/Routes';
+import InternalError from '../../screens/errors/InternalError';
 
 export const ProfileInfo = () => {
   const [firstNameError, setFirstnameError] = useState(false);
@@ -37,6 +37,8 @@ export const ProfileInfo = () => {
     nickname: '',
     email: '',
   });
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {userInfo, userToken, refreshToken} = useSelector(state => state.auth);
@@ -44,8 +46,10 @@ export const ProfileInfo = () => {
   useEffect(() => {
     setPhoto({...photo, uri: userInfo.image});
     setUserData(userInfo);
-  }, []);
-
+  }, [error]);
+  const loadProfileInfo = async () => {
+    navigation.dispatch(StackActions.replace(Routes.ProfileInfo))
+  }
   const handleChange = (field, value) => {
     setUserData({
       ...userData,
@@ -59,7 +63,6 @@ export const ProfileInfo = () => {
   
     if (userData.firstname == '') {
       setFirstnameError(true)
-      console.log('Firstname:' + userData.firstname);
       formIsValid = false;
     }
     else{
@@ -69,7 +72,6 @@ export const ProfileInfo = () => {
 
     if (userData.lastname == '') {
       setLastnameError(true)
-      console.log('Lastname:' + userData.lastname);
       formIsValid = false;
     }else{
       setLastnameError(false)
@@ -79,7 +81,6 @@ export const ProfileInfo = () => {
     if (userData.nickname == '') {
       setNicknameError(true)
       formIsValid = false;
-      console.log('Nickname: ' + userData.nickname);
     }
     else{
       setNicknameError(false)
@@ -98,11 +99,9 @@ export const ProfileInfo = () => {
         }}
       );
       if(refreshTokenResponse.status === 200){
-        console.log(JSON.stringify(refreshTokenResponse));
         dispatch(setUserToken(refreshTokenResponse))
       }
     }catch(error){
-      console.log('Sucedio un error al refrescar: ' + error.message);
       dispatch(logout());
     }
   };
@@ -185,13 +184,10 @@ export const ProfileInfo = () => {
       } catch (error) {
         if (error.response && error.response.status === 403) {
           //TODO: Arreglar el refresh y refactor
-          console.log('403')
           handleRefreshToken();
         } else {
-          Alert.alert(
-            'Ocurrio un error',
-            `Mensaje: ${error.message} \nCodigo de error:  ${error.code}`,
-          );
+          setError(true)
+          setErrorMessage(`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
         }
       } finally {
         setIsLoading(false);
@@ -217,61 +213,64 @@ export const ProfileInfo = () => {
     });
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Pressable onPress={() => openImagePicker()} style={styles.press}>
-        {photo.uri ? (
-          <Image
-            style={styles.profileImage}
-            source={{
-              uri: photo.uri,
-            }}></Image>
-        ) : (
-          <Image
-            style={styles.profileImage}
-            source={{
-              uri: 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg',
-            }}></Image>
-        )}
-      </Pressable>
-      <TextInput
-        style={styles.textInput}
-        onChangeText={value => handleChange('firstname', value)}
-        value={userData.firstname}
-        placeholder="Nombre"
-        placeholderTextColor="grey"
-      />
-      {firstNameError && 
-        <ErrorMessage message = "Por favor ingrese un nombre"></ErrorMessage>
-      }
-      <TextInput
-        style={styles.textInput}
-        onChangeText={value => handleChange('lastname', value)}
-        value={userData.lastname}
-        placeholder="Apellido"
-        placeholderTextColor="grey"
-      />
-      {lastnameError && 
-        <ErrorMessage message = "Por favor ingrese un apellido"></ErrorMessage>
-      }
-      <TextInput
-        style={styles.textInput}
-        value={userData.email}
-        editable={false}
-        placeholder="Email"
-        placeholderTextColor="grey"
-      />
-      <TextInput
-        style={styles.textInput}
-        onChangeText={value => handleChange('nickname', value)}
-        value={userData.nickname}
-        placeholder="Nickname"
-        placeholderTextColor="grey"
-      />
-      {nicknameError == true && 
-        <ErrorMessage message = "Por favor ingrese un nickname"></ErrorMessage>
-      }
-      <View style={{marginTop: 160, marginBottom: 10, alignItems: 'center'}}>
+  return (<>
+    {(!error) ?
+      <SafeAreaView style={styles.container}>
+        <Pressable onPress={() => openImagePicker()} style={styles.press}>
+          {photo.uri ? (
+            <Image
+              style={styles.profileImage}
+              source={{
+                uri: photo.uri,
+              }}></Image>
+          ) : (
+            <Image
+              style={styles.profileImage}
+              source={{
+                uri: 'https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg',
+              }}></Image>
+          )}
+        </Pressable>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'space-evenly', minHeight: 250, marginTop: 20, marginBottom: 50}}>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={value => handleChange('firstname', value)}
+            value={userData.firstname}
+            placeholder="Nombre"
+            placeholderTextColor="grey"
+          />
+          {firstNameError && 
+            <ErrorMessage message = "Por favor ingrese un nombre"></ErrorMessage>
+          }
+          <TextInput
+            style={styles.textInput}
+            onChangeText={value => handleChange('lastname', value)}
+            value={userData.lastname}
+            placeholder="Apellido"
+            placeholderTextColor="grey"
+          />
+          {lastnameError && 
+            <ErrorMessage message = "Por favor ingrese un apellido"></ErrorMessage>
+          }
+          <TextInput
+            style={styles.textInput}
+            value={userData.email}
+            editable={false}
+            placeholder="Email"
+            placeholderTextColor="grey"
+          />
+          <TextInput
+            style={styles.textInput}
+            onChangeText={value => handleChange('nickname', value)}
+            value={userData.nickname}
+            placeholder="Nickname"
+            placeholderTextColor="grey"
+          />
+        </View>
+        {nicknameError == true && 
+          <ErrorMessage message = "Por favor ingrese un nickname"></ErrorMessage>
+        }
+      <View>
         {!isLoading ? 
         <CustomButton
           title="Guardar"
@@ -279,23 +278,30 @@ export const ProfileInfo = () => {
           onPress={() => onSubmitFormHandler()}></CustomButton>
           : <ActivityIndicator size="large" color={COLORS.primary} />}
       </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      : 
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <InternalError onButtonClick={loadProfileInfo}/>
+      </View>
+    }</>
   );
 };
 
 const styles = StyleSheet.create({
   textInput: {
     fontSize: 15,
-    height: 40,
+    maxHeight: 40,
     borderWidth: 1,
-    width: '75%',
+    minWidth: '75%',
     borderRadius: 4,
     padding: 10,
     backgroundColor: COLOR.second,
   },
   container: {
+    flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: 15,
+    justifyContent: 'space-between'
   },
   title: {
     fontSize: 20,
@@ -309,10 +315,8 @@ const styles = StyleSheet.create({
   },
   press: {
     borderRadius: 100,
-    height: 150,
-    width: 150,
-    backgroundColor: 'red',
-    marginBottom: 40,
+    minHeight: 150,
+    minWidth: 150
   },
   errors: {
     color: 'red',

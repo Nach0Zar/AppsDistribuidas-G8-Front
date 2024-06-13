@@ -3,11 +3,14 @@ import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, SafeAreaVie
 import movieSearchStyles from '../styles/movieSearchStyles';
 import { faAngleLeft, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, StackActions } from '@react-navigation/native';
 import COLORS from '../styles/Theme';
 import MovieCard from '../components/atoms/MovieCard';
 import axios from 'axios';
 import {FiltterModal} from "../components/organisms/FiltterModal"
+import ConnectionStatus from '../assets/ConnectionStatus';
+import Routes from '../../Navigation/Routes';
+import { Global } from '../../Constants';
 
 const { width, height } = Dimensions.get('window');
 
@@ -50,7 +53,7 @@ const MovieSearch = () => {
   };
   const handleUrl = (page: number, release: string|null, qualification: string|null) => {
     const encodedUserInput = encodeURIComponent(userInput);
-    let url = `https://apps-distribuidas-grupo-8.onrender.com/api/movies?query=${encodedUserInput}&page=${page}`
+    let url = Global.BASE_URL+`/movies?query=${encodedUserInput}&page=${page}`
     if(release){
       url += `&release_sort=${release}`;
     }
@@ -71,6 +74,10 @@ const MovieSearch = () => {
       else {  
         try {
           let url = handleUrl(page, release,qualification)
+          let connectionStatus = await ConnectionStatus()
+          if(!connectionStatus){
+            navigation.dispatch(StackActions.replace(Routes.InternetError));
+          }
           const response = await axios.get(url);
           const movies = response.data
           if(movies.constructor === Array){

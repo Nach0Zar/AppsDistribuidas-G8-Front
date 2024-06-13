@@ -15,13 +15,16 @@ import Routes from '../../Navigation/Routes';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axios from 'axios';
 import { Global } from '../../Constants';
-import GoogleSignIn from '../asset/GoogleSignIn';
+import GoogleSignIn from '../assets/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
-
+import ConnectionStatus from '../assets/ConnectionStatus';
+import InternalError from './errors/InternalError';
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [modalDeleteAccVisible, setModalDeleteAccVisible] = useState(false);
   const dispatch = useDispatch();
   const { userInfo, userToken, refreshToken  } = useSelector((state) => state.auth);
@@ -31,25 +34,28 @@ export const ProfileInfoScreen = () => {
     if(userToken == null){
       navigation.dispatch(StackActions.replace(Routes.LoginScreen));
     }
-  }, [userToken])
-
+  }, [userToken, error])
+  const loadProfileInfo = async () => {
+    navigation.dispatch(StackActions.replace(Routes.ProfileInfo))
+  }
   const handleGoogleLogout = async () => {
     try{
-      console.log('Llamado al back /auths DELETE');
-      console.log(userToken)
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const response = await axios.delete(Global.BASE_URL + "/auths", {
         headers: {
           "Authorization" : userToken,
           "Content-Type" : "application/json"
         }
       });
-      console.log(JSON.stringify(response))
       if(response.status === 200){
         await GoogleSignin.signOut();
         dispatch(logout());
       }
       else{
-        throw new Error("Ocurrio un error al desloguear usuario: " + logOutResponse.data);
+        throw new Error("Ocurrio un error al desloguear usuario: " + response.data);
       }
     }
     catch(error){
@@ -58,13 +64,18 @@ export const ProfileInfoScreen = () => {
         dispatch(logout());
       }
       else{
-        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+        setError(true)
+        setErrorMessage(`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
       }
     }
   }
 
   const handleRefreshToken = async () => {
     try{
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const refreshTokenResponse = await axios.put(
         Global.BASE_URL + '/auths',{
         headers: {
@@ -73,18 +84,19 @@ export const ProfileInfoScreen = () => {
         }}
       );
       if(refreshTokenResponse.status === 200){
-        console.log(JSON.stringify(refreshTokenResponse));
         dispatch(setUserToken(refreshTokenResponse))
       }
     }catch(error){
-      console.log('Sucedio un error al refrescar: ' + error.message);
       dispatch(logout());
     }
   };
 
   const handleDeleteAccount = async () => {
     try{
-      console.log('Llamado al back /users DELETE');
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const response = await axios.delete(Global.BASE_URL + '/users',{
         headers: {
           'Authorization' : userToken,
@@ -99,67 +111,71 @@ export const ProfileInfoScreen = () => {
     catch(error) {
       if(error.response && error.response.status === 403){
         handleRefreshToken();
-        console.log("Hay que refrescar token")
       }
       else{
-        Alert.alert('Ocurrio un error' ,`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
+        setError(true)
+        setErrorMessage(`Mensaje: ${error.message} \nCodigo de error:  ${error.code}`)
       }
     }
   }
 
-  return (
-    <View style={styles.container}>
-      <Image
-        style={styles.profileImage}
-        source={{
-          uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
-        }}></Image>
+  return (<View style={styles.container}>
+    {(!error) ? <>
+    <Image
+      style={styles.profileImage}
+      source={{
+        uri: userInfo?.image ? userInfo?.image : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Fblank-profile-picture-mystery-man-973460%2F&psig=AOvVaw154XIaURLCbUhyBzfeh8aj&ust=1717295665249000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIjf3YGvuYYDFQAAAAAdAAAAABAE'
+      }}></Image>
 
-      <View style={styles.buttonContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
-          <Text style={styles.text}>{userInfo?.email}</Text>
-          <Text style={styles.text}>{userInfo?.nickname}</Text>
-        </View>
-        <CustomButton
-          title="Editar"
-          onPress={() => navigation.navigate(Routes.EditProfile)}
-        />
-        <CustomButton
-          title="Cerrar Sesión"
-          onPress={() => setModalLogoutVisible(true)}
-        />
-        <CustomButton
-          title="Eliminar Cuenta"
-          backgroundColor={COLOR.warning}
-          onPress={() => setModalDeleteAccVisible(true)}
-        />
+    <View style={styles.buttonContainer}>
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{userInfo?.firstname} {userInfo?.lastname}</Text>
+        <Text style={styles.text}>{userInfo?.email}</Text>
+        <Text style={styles.text}>{userInfo?.nickname}</Text>
       </View>
-      <CustomModal
-        isVisible={modalLogoutVisible}
-        text="¿Estas seguro que queres cerrar la sesión?"
-        actionButton={{
-          title: 'Si, cerrar',
-          onPress: () => handleGoogleLogout(),
-        }}
-        closeButton={{
-          title: 'Cancelar',
-          close: () => setModalLogoutVisible(false),
-        }}
+      <CustomButton
+        title="Editar"
+        onPress={() => navigation.navigate(Routes.EditProfile)}
       />
-      <CustomModal
-        isVisible={modalDeleteAccVisible}
-        text="¿Estas seguro que queres eliminar tu cuenta?"
-        actionButton={{
-          title: 'Si, eliminar',
-          onPress: () => handleDeleteAccount(),
-        }}
-        closeButton={{
-          title: 'Cancelar',
-          close: () => setModalDeleteAccVisible(false),
-        }}
+      <CustomButton
+        title="Cerrar Sesión"
+        onPress={() => setModalLogoutVisible(true)}
+      />
+      <CustomButton
+        title="Eliminar Cuenta"
+        backgroundColor={COLOR.warning}
+        onPress={() => setModalDeleteAccVisible(true)}
       />
     </View>
+    <CustomModal
+      isVisible={modalLogoutVisible}
+      text="¿Estas seguro que queres cerrar la sesión?"
+      actionButton={{
+        title: 'Si, cerrar',
+        onPress: () => handleGoogleLogout(),
+      }}
+      closeButton={{
+        title: 'Cancelar',
+        close: () => setModalLogoutVisible(false),
+      }}
+    />
+    <CustomModal
+      isVisible={modalDeleteAccVisible}
+      text="¿Estas seguro que queres eliminar tu cuenta?"
+      actionButton={{
+        title: 'Si, eliminar',
+        onPress: () => handleDeleteAccount(),
+      }}
+      closeButton={{
+        title: 'Cancelar',
+        close: () => setModalDeleteAccVisible(false),
+      }}
+    /></>
+   : 
+   <InternalError onButtonClick={loadProfileInfo}/>
+   }
+   </View>
+    
   );
 };
 
