@@ -5,6 +5,7 @@ import Login from "../ui/screens/Login";
 import LandingStack from './LandingStack';
 import HomeStack from './HomeStack';
 import Routes from "./Routes";
+import InternetError from "../ui/screens/errors/InternetError";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,10 @@ const RootNavigator = () => {
         <Stack.Screen
           name={Routes.HomeStack}
           component={HomeStack}
+        />
+        <Stack.Screen
+          name={Routes.InternetError}
+          component={InternetError}
         />
       </Stack.Navigator>
     </NavigationContainer>

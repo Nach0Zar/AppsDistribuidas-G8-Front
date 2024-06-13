@@ -22,10 +22,10 @@ const Login = () => {
         }
       };
       const response = await axios.post('https://apps-distribuidas-grupo-8.onrender.com/api/auths', {}, config);
-      const jwtToken = response.data
+      const tokens = response.data
       config = {
         headers: {
-          'Authorization': jwtToken,
+          'Authorization': tokens.jwt,
           'Content-Type': 'application/json'
         }
       };
@@ -36,8 +36,8 @@ const Login = () => {
       await AsyncStorage.setItem('@lastname', authedUserInformation.lastname  || '');
       await AsyncStorage.setItem('@email', authedUserInformation.email || '');
       await AsyncStorage.setItem('@image', authedUserInformation.image || '');
-      await AsyncStorage.setItem('@accessToken', newTokens.accessToken || '');
-      await AsyncStorage.setItem('@sessionToken', jwtToken || '');
+      await AsyncStorage.setItem('@refreshToken', tokens.refreshToken || '');
+      await AsyncStorage.setItem('@sessionToken', tokens.jwt || '');
       // if (response.status === 201) {
       //   setLoggedIn(true);
       //   navigation.navigate('NewUser') TODO: Para mi sacamos este stack
@@ -57,7 +57,7 @@ const Login = () => {
     }
   };
   const checkIfLoggedIn = async () => {
-    let googleToken = await AsyncStorage.getItem('@accessToken')
+    let googleToken = await AsyncStorage.getItem('@refreshToken')
     if (googleToken == '' || googleToken == null){
       setLoggedIn(false)
     }
