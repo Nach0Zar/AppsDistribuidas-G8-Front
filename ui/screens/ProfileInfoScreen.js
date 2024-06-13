@@ -15,7 +15,7 @@ import Routes from '../../Navigation/Routes';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import axios from 'axios';
 import { Global } from '../../Constants';
-import GoogleSignIn from '../asset/GoogleSignIn';
+import GoogleSignIn from '../assets/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
 import ConnectionStatus from '../assets/ConnectionStatus';
