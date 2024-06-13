@@ -53,7 +53,7 @@ const MovieSearch = () => {
   };
   const handleUrl = (page: number, release: string|null, qualification: string|null) => {
     const encodedUserInput = encodeURIComponent(userInput);
-    let url = Global.BASE_URL+`/api/movies?query=${encodedUserInput}&page=${page}`
+    let url = Global.BASE_URL+`/movies?query=${encodedUserInput}&page=${page}`
     if(release){
       url += `&release_sort=${release}`;
     }
@@ -74,6 +74,7 @@ const MovieSearch = () => {
       else {  
         try {
           let url = handleUrl(page, release,qualification)
+          console.log(url)
           let connectionStatus = await ConnectionStatus()
           if(!connectionStatus){
             navigation.dispatch(StackActions.replace(Routes.InternetError));
