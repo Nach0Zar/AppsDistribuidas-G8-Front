@@ -18,7 +18,7 @@ import { Global } from '../../Constants';
 import GoogleSignIn from '../asset/GoogleSignIn';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
-
+import ConnectionStatus from '../assets/ConnectionStatus';
 
 export const ProfileInfoScreen = () => {
   const [modalLogoutVisible, setModalLogoutVisible] = useState(false);
@@ -35,8 +35,10 @@ export const ProfileInfoScreen = () => {
 
   const handleGoogleLogout = async () => {
     try{
-      console.log('Llamado al back /auths DELETE');
-      console.log(userToken)
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const response = await axios.delete(Global.BASE_URL + "/auths", {
         headers: {
           "Authorization" : userToken,
@@ -65,6 +67,10 @@ export const ProfileInfoScreen = () => {
 
   const handleRefreshToken = async () => {
     try{
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const refreshTokenResponse = await axios.put(
         Global.BASE_URL + '/auths',{
         headers: {
@@ -84,7 +90,10 @@ export const ProfileInfoScreen = () => {
 
   const handleDeleteAccount = async () => {
     try{
-      console.log('Llamado al back /users DELETE');
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const response = await axios.delete(Global.BASE_URL + '/users',{
         headers: {
           'Authorization' : userToken,
