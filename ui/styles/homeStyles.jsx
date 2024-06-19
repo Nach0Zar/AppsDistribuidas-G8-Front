@@ -27,6 +27,23 @@ const homeStyles = StyleSheet.create({
       paddingHorizontal: width * 0.04,
       marginHorizontal: width * 0.046,
       backgroundColor: COLOR.second,
+    },
+    chip: {
+      marginHorizontal: 4,
+      borderRadius: 40,
+    },
+    chipSelected: {
+      backgroundColor: '#737373',
+    },
+    chipUnselected: {
+      backgroundColor: 'transparent',
+    },
+    chipText: {
+      color: COLOR.second
+    },
+    genreChipsContainer: {
+      paddingVertical: 12,
+      paddingHorizontal: 8,
     }
   });
 
