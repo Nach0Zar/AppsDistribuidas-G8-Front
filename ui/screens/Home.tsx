@@ -1,46 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, TextInput, Text, ScrollView } from 'react-native';
+import { SafeAreaView, View, TextInput, Text, ScrollView, ActivityIndicator, FlatList } from 'react-native';
 import homeStyles from '../styles/homeStyles';
 import { useNavigation } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import Routes from '../../Navigation/Routes';
 import InternalError from './errors/InternalError';
 import { Chip } from 'react-native-paper';
-
-const genres = ['Accion', 'Comedia', 'Drama', 'Romance', 'Terror', 'Suspenso', 'Ciencia Ficcion'];
+import { Global } from '../../Constants';
+import axios from 'axios';
 
 const Home = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const [homeLoaded, setHomeLoaded] = useState<boolean>(false);
   const [selectedGenre, setSelectedGenre] = useState(null);
+  const [genres, setGenres] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const loadHome = async () => {
-    return false;//forzar pagina de error ya que el home no esta hecho
-  }
   useEffect(() => {
-    if(!homeLoaded){
-      loadHome().then(status => {setHomeLoaded((status === null) ? false : status)});
-    }
-  }, [homeLoaded]);
+    fetchGenres();
+  }, []);
 
-  const renderGenreChip = (genre:any, index:any) => (
+  const fetchGenres = async () => {
+    try {
+      let url = Global.BASE_URL+`/genres`
+      const response = await axios.get(url);
+      console.log(response.data);
+      setGenres(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching genres:', error);
+      setLoading(false);
+    }
+  };
+
+  const renderGenreChip = (genre: any) => (
     <Chip
-      key={index}
+      key={genre.id}
       style={[
         homeStyles.chip,
-        selectedGenre === genre ? homeStyles.chipSelected : homeStyles.chipUnselected,
+        selectedGenre === genre.name ? homeStyles.chipSelected : homeStyles.chipUnselected,
       ]}
       mode={selectedGenre === genre ? 'flat' : 'outlined'}
       textStyle={homeStyles.chipText}
-      onPress={() => handleGenre(genre)}
+      onPress={() => handleGenre(genre.name)}
     >
-      {genre}
+      {genre.name}
     </Chip>
   );
 
   const handleGenre = (genre:any) => {
-    setSelectedGenre(genre)
+    if(selectedGenre === genre) {
+      setSelectedGenre(null);
+      console.log(genre)
+    } else {
+      setSelectedGenre(genre);
+      console.log(genre)
+    }
   }
 
   return (
@@ -53,9 +68,13 @@ const Home = () => {
         />
       </View>
       <View style={homeStyles.genreChipsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {genres.map(renderGenreChip)}
-        </ScrollView>
+        {loading ? (
+          <ActivityIndicator size="small" color="#0000ff" />
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {genres.map(renderGenreChip)}
+          </ScrollView>
+        )}
       </View>
     </SafeAreaView>
   );
