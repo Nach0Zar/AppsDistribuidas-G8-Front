@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, TextInput, Text, ScrollView, ActivityIndicator, FlatList } from 'react-native';
+import { SafeAreaView, View, TextInput, Text, ScrollView, ActivityIndicator, FlatList, Dimensions } from 'react-native';
 import homeStyles from '../styles/homeStyles';
 import { useNavigation } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
@@ -8,28 +8,54 @@ import InternalError from './errors/InternalError';
 import { Chip } from 'react-native-paper';
 import { Global } from '../../Constants';
 import axios from 'axios';
+import MovieCard from '../components/atoms/MovieCard';
+import { COLOR } from '../styles/Theme';
+
+const { width, height } = Dimensions.get('window');
 
 const Home = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [selectedGenre, setSelectedGenre] = useState<{ id: string; name: string } | null>(null);
   const [genres, setGenres] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingGenres, setLoadingGenres] = useState(true);
+  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [movies, setMovies] = useState<Array<any>>([]);
 
   useEffect(() => {
     fetchGenres();
   }, []);
 
+  useEffect(() => {
+    if (selectedGenre) {
+      setMovies([]);
+      getMovies(selectedGenre);
+    }
+  }, [selectedGenre]);
+
+  const getMovies = async ( genre:any ) => {
+    try {
+      let url = Global.BASE_URL+`/movies?genre=${genre.id}`
+      const response = await axios.get(url);
+      const movies = response.data;
+      setMovies(movies);
+      setLoadingMovies(false);
+    } 
+    catch (error) {
+      console.log(error);
+      setLoadingMovies(false);
+    }
+  };
+
   const fetchGenres = async () => {
     try {
       let url = Global.BASE_URL+`/genres`
       const response = await axios.get(url);
-      console.log(response.data);
       setGenres(response.data);
-      setLoading(false);
+      setLoadingGenres(false);
     } catch (error) {
       console.error('Error fetching genres:', error);
-      setLoading(false);
+      setLoadingGenres(false);
     }
   };
 
@@ -38,11 +64,11 @@ const Home = () => {
       key={genre.id}
       style={[
         homeStyles.chip,
-        selectedGenre === genre.name ? homeStyles.chipSelected : homeStyles.chipUnselected,
+        selectedGenre && selectedGenre.name === genre.name  ? homeStyles.chipSelected : homeStyles.chipUnselected,
       ]}
-      mode={selectedGenre === genre ? 'flat' : 'outlined'}
+      mode={selectedGenre && selectedGenre.name === genre.name  ? 'flat' : 'outlined'}
       textStyle={homeStyles.chipText}
-      onPress={() => handleGenre(genre.name)}
+      onPress={() => handleGenre(genre)}
     >
       {genre.name}
     </Chip>
@@ -51,10 +77,10 @@ const Home = () => {
   const handleGenre = (genre:any) => {
     if(selectedGenre === genre) {
       setSelectedGenre(null);
-      console.log(genre)
+      setLoadingMovies(true);
     } else {
       setSelectedGenre(genre);
-      console.log(genre)
+      setLoadingMovies(true);
     }
   }
 
@@ -68,12 +94,39 @@ const Home = () => {
         />
       </View>
       <View style={homeStyles.genreChipsContainer}>
-        {loading ? (
-          <ActivityIndicator size="small" color="#0000ff" />
+        {loadingGenres ? (
+          <ActivityIndicator size="large" color={COLOR.second} />
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {genres.map(renderGenreChip)}
           </ScrollView>
+        )}
+      </View>
+      <View>
+        {selectedGenre ? (
+          <View style={{paddingVertical: 8, alignItems:'center'}}>
+            {loadingMovies ? (
+              <ActivityIndicator size="large" color={COLOR.second} />
+            ) : (
+              <FlatList
+                data={movies}
+                keyExtractor={(item) => item['id']}
+                numColumns={3}
+                renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster']}} />}
+                contentContainerStyle={{ gap: height * 0.024 }}
+                columnWrapperStyle={{ gap: width * 0.0512 }}
+                /*onEndReached={() => {
+                  if ( hasMorePages ){
+                    setPage((prevPage) => prevPage + 1);
+                    getMovies(userInput, page + 1,releaseSort,qualificationSort);
+                  }
+                }}*/
+                onEndReachedThreshold={0.5}
+              />
+            )}
+        </View>
+        ) : (
+          <Text>No hay genre seleccionado</Text>
         )}
       </View>
     </SafeAreaView>
