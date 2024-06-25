@@ -21,29 +21,34 @@ const Home = () => {
   const [loadingGenres, setLoadingGenres] = useState(true);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [movies, setMovies] = useState<Array<any>>([]);
+  const [page, setPage] = useState(1);
+  const [hasMorePages, setHasMorePages] = useState(false);
 
   useEffect(() => {
     fetchGenres();
   }, []);
 
   useEffect(() => {
+    setPage(1);
     if (selectedGenre) {
       setMovies([]);
-      getMovies(selectedGenre);
+      getMovies(selectedGenre, 1);
     }
   }, [selectedGenre]);
 
-  const getMovies = async ( genre:any ) => {
+  const getMovies = async ( genre:any, page:number ) => {
     try {
-      let url = Global.BASE_URL+`/movies?genre=${genre.id}`
+      let url = Global.BASE_URL+`/movies?genre=${genre.id}&page=${page}`
       const response = await axios.get(url);
       const movies = response.data;
-      setMovies(movies);
+      setMovies((prevMovies) => [...prevMovies, ...movies]);
+      setHasMorePages(movies.length == 20);
       setLoadingMovies(false);
     } 
     catch (error) {
       console.log(error);
       setLoadingMovies(false);
+      setHasMorePages(false);
     }
   };
 
@@ -75,12 +80,11 @@ const Home = () => {
   );
 
   const handleGenre = (genre:any) => {
+    setLoadingMovies(true);
     if(selectedGenre === genre) {
       setSelectedGenre(null);
-      setLoadingMovies(true);
     } else {
       setSelectedGenre(genre);
-      setLoadingMovies(true);
     }
   }
 
@@ -115,12 +119,12 @@ const Home = () => {
                 renderItem={({ item }) => <MovieCard movie={{ id: item['id'], title: item['title'], default_poster: item['default_poster']}} />}
                 contentContainerStyle={{ gap: height * 0.024 }}
                 columnWrapperStyle={{ gap: width * 0.0512 }}
-                /*onEndReached={() => {
+                onEndReached={() => {
                   if ( hasMorePages ){
                     setPage((prevPage) => prevPage + 1);
-                    getMovies(userInput, page + 1,releaseSort,qualificationSort);
+                    getMovies(selectedGenre, page + 1);
                   }
-                }}*/
+                }}
                 onEndReachedThreshold={0.5}
               />
             )}
