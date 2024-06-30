@@ -26,8 +26,7 @@ const movieSearchStyles = StyleSheet.create({
   image: {
     width: 300,
     height: 300,
-    alignSelf: 'center',
-    marginTop: 100,
+    alignSelf: 'center'
   },
   noResultsContainer: {
     alignItems: 'center',
