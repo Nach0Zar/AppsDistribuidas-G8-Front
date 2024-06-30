@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, Dimensions } from 'react-native';
+import { View, Text, TextInput, Image, ActivityIndicator, TouchableOpacity, SafeAreaView, FlatList, Dimensions } from 'react-native';
 import movieSearchStyles from '../styles/movieSearchStyles';
 import { faAngleLeft, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { useNavigation, StackActions } from '@react-navigation/native';
-import COLORS from '../styles/Theme';
+import COLORS, {COLOR} from '../styles/Theme';
 import MovieCard from '../components/atoms/MovieCard';
 import axios from 'axios';
 import {FiltterModal} from "../components/organisms/FiltterModal"
@@ -25,6 +25,8 @@ const MovieSearch = () => {
   const [showFiltter, setShowFiltter] = useState(false);
   const [releaseSort, setReleaseSort] = useState<string|null>(null);
   const [qualificationSort, setQualificationSort] = useState<string|null>(null);
+  const [loadingMovies, setLoadingMovies] = useState<boolean>(false);
+  const [initialSearch, setInitialSearch] = useState<boolean>(false);
 
   const navigation = useNavigation();
 
@@ -64,45 +66,46 @@ const MovieSearch = () => {
   }
 
   const getMovies = async (userInput: string, page: number, release: string|null, qualification: string|null) => {
-
-      if (userInput.length < 2) {
-        setShowLogo(true);
-        setShowNoResults(false);
-        setShowMovies(false);
-        setMovies([]);
-      } 
-      else {  
-        try {
-          let url = handleUrl(page, release,qualification)
-          let connectionStatus = await ConnectionStatus()
-          if(!connectionStatus){
-            navigation.dispatch(StackActions.replace(Routes.InternetError));
-          }
-          const response = await axios.get(url);
-          const movies = response.data
-          if(movies.constructor === Array){
-            setMovies((prevMovies) => [...prevMovies, ...movies]);
-            setHasMorePages(movies.length == 20);
-          } 
-          else {
-            let moviesList = []
-            moviesList[0] = movies
-            setMovies(moviesList)
-            setHasMorePages(false);
-          }
-          setShowNoResults(false);
-          setShowMovies(true);
-          setShowLogo(false);
+    setLoadingMovies(true)
+    if (userInput.length < 2) {
+      setShowLogo(true);
+      setShowNoResults(false);
+      setShowMovies(false);
+      setMovies([]);
+    } 
+    else {  
+      try {
+        let url = handleUrl(page, release,qualification)
+        let connectionStatus = await ConnectionStatus()
+        if(!connectionStatus){
+          navigation.dispatch(StackActions.replace(Routes.InternetError));
+        }
+        const response = await axios.get(url);
+        const movies = response.data
+        if(movies.constructor === Array){
+          setMovies((prevMovies) => [...prevMovies, ...movies]);
+          setHasMorePages(movies.length == 20);
         } 
-        catch(error) {
+        else {
+          let moviesList = []
+          moviesList[0] = movies
+          setMovies(moviesList)
           setHasMorePages(false);
-          if(page === 1 ){
-            setShowNoResults(true);
-            setShowLogo(false);
-            setShowMovies(false);
-          }
-        } 
+        }
+        setShowNoResults(false);
+        setShowMovies(true);
+        setShowLogo(false);
       } 
+      catch(error) {
+        setHasMorePages(false);
+        if(page === 1 ){
+          setShowNoResults(true);
+          setShowLogo(false);
+          setShowMovies(false);
+        }
+      } 
+    } 
+    setLoadingMovies(false)
   };
  
   return (
@@ -119,10 +122,19 @@ const MovieSearch = () => {
         />
       </View>
       {showLogo && (
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={movieSearchStyles.image}
-        />
+        <View style={{flex:1, alignItems:'center', justifyContent: 'center'}}>
+          <View style={{flex:1, zIndex:0, alignItems:'center', justifyContent: 'center'}}>
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={movieSearchStyles.image}
+            />
+          </View>
+          {(loadingMovies) && (
+            <View style={{flex:1, position: 'absolute',  top: 0, left: 0, right: 0, bottom: 0, zIndex:1, backgroundColor: 'rgba(0, 0, 0, 0.6)'}}>
+              <ActivityIndicator size="large" color={COLOR.second} style={{flex:1}}/>
+            </View>
+          )}
+        </View>
       )}
       {showNoResults && (
         <View style={movieSearchStyles.noResultsContainer}>
@@ -148,11 +160,13 @@ const MovieSearch = () => {
               columnWrapperStyle={{ gap: width * 0.0512 }}
               onEndReached={() => {
                 if (userInput && hasMorePages){
+                  setLoadingMovies(true);
                   setPage((prevPage) => prevPage + 1);
                   getMovies(userInput, page + 1,releaseSort,qualificationSort);
                 }
               }}
               onEndReachedThreshold={0.5}
+              ListFooterComponent = {() => loadingMovies && <ActivityIndicator size="large" color={COLOR.second} />}
             />
           </View>
           <FiltterModal
