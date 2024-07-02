@@ -9,11 +9,10 @@ export interface MovieProps {
   }
 }
 
-const Details = ({route} : MovieProps) => {
-  console.log(route.params.id)
+const Details = (props: MovieProps) => {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Details Screen {route.params.id}</Text>
+      <Text>Details Screen {props.route.params.id}</Text>
     </View>
   );
 };
