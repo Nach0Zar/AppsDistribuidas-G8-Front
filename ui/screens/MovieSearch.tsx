@@ -26,17 +26,16 @@ const MovieSearch = () => {
   const [releaseSort, setReleaseSort] = useState<string|null>(null);
   const [qualificationSort, setQualificationSort] = useState<string|null>(null);
   const [loadingMovies, setLoadingMovies] = useState<boolean>(false);
-  const [initialSearch, setInitialSearch] = useState<boolean>(false);
-
   const navigation = useNavigation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (userInput) {
+      if (userInput !== "") {
         setPage(1);
         setMovies([]);
         getMovies(userInput, 1,releaseSort,qualificationSort);
       } else {
+        setLoadingMovies(false)
         setShowLogo(true);
         setShowNoResults(false);
         setShowMovies(false);
@@ -92,9 +91,11 @@ const MovieSearch = () => {
           setMovies(moviesList)
           setHasMorePages(false);
         }
-        setShowNoResults(false);
-        setShowMovies(true);
-        setShowLogo(false);
+        if(loadingMovies){
+          setShowNoResults(false);
+          setShowMovies(true);
+          setShowLogo(false);
+        }
       } 
       catch(error) {
         setHasMorePages(false);
