@@ -55,6 +55,7 @@ const detailsStyle = StyleSheet.create({
   labelContainer: {
     flex:1, 
     flexDirection: 'row', 
+    marginTop: 10,
     justifyContent: 'space-between', 
     alignItems: 'center',
     maxHeight: 20
@@ -71,6 +72,12 @@ const detailsStyle = StyleSheet.create({
     color: COLOR.second,
     fontWeight: 'medium',
     fontFamily: 'roboto',
+    paddingTop: 10,
+    paddingBottom: 10
+  },
+  hr: {
+    borderBottomColor: COLOR.second,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     paddingBottom: 10
   }
 });
