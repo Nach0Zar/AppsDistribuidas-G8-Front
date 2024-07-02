@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Image, StyleSheet, Dimensions, Text } from 'react-native';
+import { Pressable, Image, StyleSheet, Dimensions, Text } from 'react-native';
 import { COLOR } from '../../styles/Theme';
+import { useNavigation } from '@react-navigation/native';
+import Routes from '../../../Navigation/Routes';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 
 interface MovieCardProps {
   movie: {
@@ -14,13 +17,15 @@ interface MovieCardProps {
     };
   };
 }
-
-const MovieCard: React.FC<MovieCardProps> = ({ movie }) => (
-  <View style={styles.cardContainer}>
+const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+ 
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  return (
+  <Pressable style={styles.cardContainer} onPress={() => navigation.push(Routes.DetailsScreen, {id: movie.id})}>
       <Image source={{uri: "https://image.tmdb.org/t/p/original"+ movie.default_poster.file_path}} style={styles.cardImage} />
       <Text style={styles.cardTitle}>{movie.title}</Text>
-  </View>
-);
+  </Pressable>
+)};
 
 const { width, height } = Dimensions.get('window');
 

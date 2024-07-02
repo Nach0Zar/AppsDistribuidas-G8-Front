@@ -4,8 +4,13 @@ import Home from "../ui/screens/Home";
 import MovieSearch from "../ui/screens/MovieSearch";
 import Details from "../ui/screens/Details";
 import Routes from "./Routes";
+import { MovieProps } from "../ui/screens/Details";
 
 const Stack = createNativeStackNavigator();
+
+type DetailsScreenProps = {
+  route: { params: MovieProps}
+}
 
 const HomeStack = () => {
     return (
@@ -14,7 +19,7 @@ const HomeStack = () => {
               name={Routes.HomeScreen}
               component={Home}
             />
-            <Stack.Screen
+            <Stack.Screen<DetailsScreenProps>
               name={Routes.DetailsScreen}
               component={Details}
             />
