@@ -178,6 +178,9 @@ const Details = (props: MovieProps) => {
           <Text style={detailsStyle.label}>|</Text>
           <Text style={detailsStyle.label}>{movie!.qualification}({movie!.qualifiers})</Text>
         </View>
+        <View
+          style={detailsStyle.hr}
+        />
         <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
       </View>
       <View style={detailsStyle.commentsAndPeopleContainer}>
