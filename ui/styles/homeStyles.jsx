@@ -44,7 +44,18 @@ const homeStyles = StyleSheet.create({
     genreChipsContainer: {
       paddingVertical: 12,
       paddingHorizontal: 8,
-    }
+    },
+    genreSection: {
+      marginBottom: 12,
+      paddingHorizontal: 4
+    },
+    genreTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLOR.second,
+      marginBottom: 8,
+      marginHorizontal: 12,
+    },
   });
 
   export default homeStyles;
