@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { COLOR } from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
 import { useNavigation, StackActions } from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
 import axios from 'axios';
 import { Global } from '../../Constants';
+import detailsStyle from '../styles/detailsStyle';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faAngleLeft, faHeart, faShareNodes } from '@fortawesome/free-solid-svg-icons';
+import COLORS from '../styles/Theme';
 
 export interface MovieProps {
   route: {
@@ -32,17 +36,23 @@ interface Person {
   name: String,
   department: String
 }
-
+interface ImageProperties {
+  aspect_ratio: number,
+  height: number,
+  width: number,
+  file_path: String
+}
 interface Movie {
   id: String,
   title: String,
   subtitle: String,
   synopsis: String,
   genre: Genre,
-  images: Array<String>,
+  default_poster: ImageProperties,
+  images: Array<ImageProperties>,
   videos: Array<String>,
   release_date: String,
-  duration: number,
+  duration: String,
   qualification: number,
   qualifiers: number,
   cast: Array<Person>,
@@ -64,7 +74,7 @@ const Details = (props: MovieProps) => {
       const url = Global.BASE_URL+`/movies/${id}`
       const response = await axios.get(url);
       const movieData = response.data;
-      let crew:Person[] = [], cast:Person[] = [], comments:Comment[] = [];
+      let crew:Person[] = [], cast:Person[] = [], comments:Comment[] = [], images:ImageProperties[] = [];
       movieData.cast.forEach((castMember: any) => {
         cast.push({
           name: castMember.name,
@@ -86,16 +96,39 @@ const Details = (props: MovieProps) => {
           id: comment.id
         });
       });
+      movieData.images.forEach((image: any) => {
+        images.push({
+          aspect_ratio: image.aspect_ratio,
+          height: image.height,
+          width: image.width,
+          file_path: image.file_path
+        });
+      });
+      let duration;
+      if(movieData.duration > 59){
+        if(movieData.duration % 60 == 0){
+          duration = Math.floor(movieData.duration / 60) + "h "
+        }
+        else{
+          duration = Math.floor(movieData.duration / 60) + "h " + (movieData.duration % 60) + " min" 
+        }
+      }
+      else{
+        duration = movieData.duration + " min"
+      }
+      let release_year = movieData.release_date.substring(0, 4);
+
       setMovie({
         id: movieData.id,
         title: movieData.title,
         subtitle: movieData.subtitle,
         synopsis: movieData.synopsis,
         genre: movieData.genre,
-        images: movieData.images,
+        default_poster: movieData.default_poster,
+        images: images,
         videos: movieData.videos,
-        release_date: movieData.release_date,
-        duration: movieData.duration,
+        release_date: release_year,
+        duration: duration,
         qualification: movieData.qualification,
         qualifiers: movieData.qualifiers,
         cast: cast,
@@ -110,9 +143,51 @@ const Details = (props: MovieProps) => {
   }, [loadedMovie]);
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR.primaryBackground }}>
-      {loadedMovie ? <Text>Details Screen {movie!.title}</Text> : <Text>Details Screen {props.route.params.id}</Text>}
+    <SafeAreaView style={detailsStyle.container}>
+    <View style={detailsStyle.header}>
+      <View style = {{flex: 1, flexBasis: '65%'}}>
+        <TouchableOpacity  onPress={() => navigation.goBack()}>
+          <FontAwesomeIcon icon={faAngleLeft} size={24} color={COLORS.white}/>
+        </TouchableOpacity>
+      </View>
+      {loadedMovie && 
+      <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+        <TouchableOpacity>
+          <FontAwesomeIcon icon={faHeart} size={24} color={COLORS.white}/>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <FontAwesomeIcon icon={faShareNodes} size={24} color={COLORS.white}/>
+        </TouchableOpacity>
+      </View>
+      }
     </View>
+    {loadedMovie ? 
+    <View style={detailsStyle.container}>
+      <View style={detailsStyle.imageContainer}>
+        <Image source={{uri: "https://image.tmdb.org/t/p/original" + movie!.default_poster.file_path}} style={detailsStyle.image}/>
+      </View>
+      <View style={detailsStyle.detailsContainer}>
+        <Text style={detailsStyle.title}>{movie!.title}</Text>
+        <Text style={detailsStyle.subtitle}>{movie!.subtitle}</Text>
+        <View style={detailsStyle.labelContainer}>
+          <Text style={detailsStyle.label}>{movie!.release_date}</Text>
+          <Text style={detailsStyle.label}>|</Text>
+          <Text style={detailsStyle.label}>{movie!.duration}</Text>
+          <Text style={detailsStyle.label}>|</Text>
+          <Text style={detailsStyle.label}>{movie!.genre.name}</Text>
+          <Text style={detailsStyle.label}>|</Text>
+          <Text style={detailsStyle.label}>{movie!.qualification}({movie!.qualifiers})</Text>
+        </View>
+        <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
+      </View>
+      <View style={detailsStyle.commentsAndPeopleContainer}>
+        <Text style={detailsStyle.synopsis}>asd</Text>
+      </View>
+    </View>
+    : 
+    <ActivityIndicator size="large" color={COLOR.second} style={{flex:1}}/>
+    }
+    </SafeAreaView>
   );
 };
 
