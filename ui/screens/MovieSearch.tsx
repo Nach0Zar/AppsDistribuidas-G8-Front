@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Image, ActivityIndicator, TouchableOpacity, SafeAreaView, FlatList, Dimensions } from 'react-native';
 import movieSearchStyles from '../styles/movieSearchStyles';
 import { faAngleLeft, faFilter } from '@fortawesome/free-solid-svg-icons';
@@ -27,13 +27,14 @@ const MovieSearch = () => {
   const [qualificationSort, setQualificationSort] = useState<string|null>(null);
   const [loadingMovies, setLoadingMovies] = useState<boolean>(false);
   const navigation = useNavigation();
-
+  const timeoutRef = useRef<any>(null)
   useEffect(() => {
-    const timer = setTimeout(() => {
+    clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(async () => {
       if (userInput !== "") {
         setPage(1);
         setMovies([]);
-        getMovies(userInput, 1,releaseSort,qualificationSort);
+        await getMovies(userInput, 1,releaseSort,qualificationSort);
       } else {
         setLoadingMovies(false)
         setShowLogo(true);
@@ -42,8 +43,8 @@ const MovieSearch = () => {
         setMovies([]);
         setHasMorePages(true);
       }
+      timeoutRef.current = null;
     }, 500);
-    return () => clearTimeout(timer);
   }, [userInput,releaseSort,qualificationSort]);
 
   const handleSave = (release:string|null,qualification:string|null) => {
@@ -64,9 +65,9 @@ const MovieSearch = () => {
     return url;
   }
 
-  const getMovies = async (userInput: string, page: number, release: string|null, qualification: string|null) => {
+  const getMovies = async (input: string, page: number, release: string|null, qualification: string|null) => {
     setLoadingMovies(true)
-    if (userInput.length < 2) {
+    if (input.length < 2) {
       setShowLogo(true);
       setShowNoResults(false);
       setShowMovies(false);
@@ -91,7 +92,7 @@ const MovieSearch = () => {
           setMovies(moviesList)
           setHasMorePages(false);
         }
-        if(loadingMovies){
+        if(timeoutRef.current !== null){
           setShowNoResults(false);
           setShowMovies(true);
           setShowLogo(false);
