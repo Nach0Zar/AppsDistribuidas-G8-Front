@@ -221,7 +221,7 @@ const Details = (props: MovieProps) => {
 
   return (
     <>
-      {(error) ?
+      {(!error) ?
       <SafeAreaView style={detailsStyle.container}>
         <View style={detailsStyle.header}>
           <View style = {{flex: 1, flexBasis: '65%'}}>
