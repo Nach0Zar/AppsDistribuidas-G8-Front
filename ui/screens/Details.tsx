@@ -221,7 +221,7 @@ const Details = (props: MovieProps) => {
 
   return (
     <>
-      {(!error) ?
+      {(error) ?
       <SafeAreaView style={detailsStyle.container}>
         <View style={detailsStyle.header}>
           <View style = {{flex: 1, flexBasis: '65%'}}>
@@ -271,7 +271,7 @@ const Details = (props: MovieProps) => {
         }
       </SafeAreaView>
       :
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1 }}>
         <InternalError onButtonClick={loadProfileInfo}/>
       </View>
       }
