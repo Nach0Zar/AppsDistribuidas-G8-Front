@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, ToastAndroid } from 'react-native';
 import { COLOR } from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
 import { useNavigation, StackActions } from '@react-navigation/native';
@@ -85,8 +85,12 @@ const Details = (props: MovieProps) => {
       message: message
     };
     Share.open(shareOptions)
-    .then(()=>{})
-    .catch(()=>{})
+    .then(()=>{
+      ToastAndroid.showWithGravity('Movie shared!', ToastAndroid.SHORT, ToastAndroid.CENTER)
+    })
+    .catch(()=>{
+      ToastAndroid.showWithGravity('Share cancelled!', ToastAndroid.SHORT, ToastAndroid.CENTER)
+    })
   }
   const handleRefreshToken = async () => {
     try{
