@@ -14,6 +14,7 @@ import COLORS from '../styles/Theme';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, setUserToken, updateFavoritesList} from '../../redux/slices/authSlice';
 import InternalError from './errors/InternalError';
+import Share from 'react-native-share'
 
 export interface MovieProps {
   route: {
@@ -76,6 +77,16 @@ const Details = (props: MovieProps) => {
   const {userInfo, userToken, refreshToken} = useSelector((state:any) => state.auth);
   const loadProfileInfo = async () => {
     navigation.dispatch(StackActions.replace(Routes.HomeScreen))
+  }
+  const handleShare = async () => {
+    let message = 'Hola! Te comparto esta pelicula llamada ' + ((movie == null) ? "undefined" : movie!.title);
+    const shareOptions:any = {
+      title: 'Share via',
+      message: message
+    };
+    Share.open(shareOptions)
+    .then(()=>{})
+    .catch(()=>{})
   }
   const handleRefreshToken = async () => {
     try{
@@ -234,7 +245,7 @@ const Details = (props: MovieProps) => {
             <TouchableOpacity onPress={() => handleFavorite()}>
               <FontAwesomeIcon icon={(favorite) ? faHeart : regularHeart} size={24} color={COLORS.white}/>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => handleShare()}>
               <FontAwesomeIcon icon={faShareNodes} size={24} color={COLORS.white}/>
             </TouchableOpacity>
           </View>
