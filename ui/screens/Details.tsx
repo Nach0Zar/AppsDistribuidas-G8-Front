@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, setUserToken, updateFavoritesList} from '../../redux/slices/authSlice';
 import InternalError from './errors/InternalError';
 import Share from 'react-native-share'
+import { useToast } from 'react-native-toast-notifications';
 
 export interface MovieProps {
   route: {
@@ -72,6 +73,7 @@ const Details = (props: MovieProps) => {
   const [favorite, setFavorite] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<String>("");
+  const toast = useToast();
   const { id } = props.route.params;
   const dispatch = useDispatch();
   const {userInfo, userToken, refreshToken} = useSelector((state:any) => state.auth);
@@ -84,13 +86,33 @@ const Details = (props: MovieProps) => {
       title: 'Share via',
       message: message
     };
-    Share.open(shareOptions)
-    .then(()=>{
-      ToastAndroid.showWithGravity('Movie shared!', ToastAndroid.SHORT, ToastAndroid.CENTER)
-    })
-    .catch(()=>{
-      ToastAndroid.showWithGravity('Share cancelled!', ToastAndroid.SHORT, ToastAndroid.CENTER)
-    })
+    try{
+      await Share.open(shareOptions)
+      toast.show('Pelicula compartida correctamente!', {
+        type: 'success',
+        placement: 'bottom',
+        duration: 3000,
+        animationType: 'slide-in'
+      });
+    }
+    catch(error: any){
+      let toastMessage;
+      let type;
+      if(error.toString().includes('User did not share')){
+        toastMessage = "Compartir pelicula cancelado!"
+        type = 'warning'
+      }
+      else{
+        toastMessage = "Compartir pelicula fallo!"
+        type = 'danger'
+      }
+      toast.show(toastMessage, {
+        type: type,
+        placement: 'bottom',
+        duration: 3000,
+        animationType: 'slide-in'
+      });
+    }
   }
   const handleRefreshToken = async () => {
     try{
@@ -256,7 +278,7 @@ const Details = (props: MovieProps) => {
           }
         </View>
         {loadedMovie ? 
-        <View style={detailsStyle.container}>
+        <View style={detailsStyle.container}> 
           <View style={detailsStyle.imageContainer}>
             <Image source={{uri: "https://image.tmdb.org/t/p/original" + movie!.default_poster.file_path}} style={detailsStyle.image}/>
           </View>
