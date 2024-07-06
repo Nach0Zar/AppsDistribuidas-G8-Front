@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, ToastAndroid } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, ToastAndroid, Pressable } from 'react-native';
 import { COLOR } from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
 import { useNavigation, StackActions } from '@react-navigation/native';
@@ -16,6 +16,8 @@ import { logout, setUserToken, updateFavoritesList} from '../../redux/slices/aut
 import InternalError from './errors/InternalError';
 import Share from 'react-native-share'
 import { useToast } from 'react-native-toast-notifications';
+import CustomCarousel from '../components/organisms/CustomCarousel';
+import { ImageProperties } from '../models/ImageProperties';
 
 export interface MovieProps {
   route: {
@@ -42,12 +44,6 @@ interface Person {
   name: String,
   department: String
 }
-interface ImageProperties {
-  aspect_ratio: number,
-  height: number,
-  width: number,
-  file_path: String
-}
 interface Movie {
   id: String,
   title: String,
@@ -72,6 +68,7 @@ const Details = (props: MovieProps) => {
   const [movie, setMovie] = useState<Movie|null>(null);
   const [favorite, setFavorite] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [showCarousel, setShowCarousel] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<String>("");
   const toast = useToast();
   const { id } = props.route.params;
@@ -254,7 +251,7 @@ const Details = (props: MovieProps) => {
     if(!loadedMovie){
       getMovieInformation();
     }
-  }, [loadedMovie, favorite, error]);
+  }, [loadedMovie, favorite, error, showCarousel]);
 
   return (
     <>
@@ -280,7 +277,9 @@ const Details = (props: MovieProps) => {
         {loadedMovie ? 
         <View style={detailsStyle.container}> 
           <View style={detailsStyle.imageContainer}>
-            <Image source={{uri: "https://image.tmdb.org/t/p/original" + movie!.default_poster.file_path}} style={detailsStyle.image}/>
+            <Pressable onPress={()=>{setShowCarousel(true)}}>
+              <Image source={{uri: "https://image.tmdb.org/t/p/original" + movie!.default_poster.file_path}} style={detailsStyle.image}/>
+            </Pressable>
           </View>
           <View style={detailsStyle.detailsContainer}>
             <Text style={detailsStyle.title}>{movie!.title}</Text>
@@ -302,6 +301,11 @@ const Details = (props: MovieProps) => {
           <View style={detailsStyle.commentsAndPeopleContainer}>
             <Text style={detailsStyle.synopsis}>asd</Text>
           </View>
+          <CustomCarousel 
+            images = {movie!.images}
+            videos = {movie!.videos}
+            isVisible = {showCarousel}
+            onClose={()=>{setShowCarousel(false)}}/>
         </View>
         : 
         <ActivityIndicator size="large" color={COLOR.second} style={{flex:1}}/>
