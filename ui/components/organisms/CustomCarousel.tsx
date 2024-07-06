@@ -4,6 +4,7 @@ import Carousel from 'react-native-reanimated-carousel';
 import { ImageProperties } from '../../models/ImageProperties';
 import { COLOR } from '../../styles/Theme';
 import { CustomButton } from '../atoms/CustomButton';
+import YoutubeIframe from 'react-native-youtube-iframe';
 
 interface CarouselProps {
     images: Array<ImageProperties>,
@@ -20,7 +21,7 @@ interface Media {
 const CustomCarousel = ({images, videos, isVisible, onClose }: CarouselProps) => {
     const [itemsLoaded, setItemsLoaded] = useState<boolean>(false);
     const [items, setItems] = useState<Array<Media>>([]);
-    const { width } = Dimensions.get('window');
+    const { width, height } = Dimensions.get('window');
     useEffect(()=>{
         if(!itemsLoaded){
             let parsedItems: Array<Media> = [];
@@ -43,7 +44,7 @@ const CustomCarousel = ({images, videos, isVisible, onClose }: CarouselProps) =>
         }
     },[items])
 
-    const renderItem = ({item, index} : { item: any, index:number}) => {
+    const renderItem = ({item} : { item: any }) => {
         if (item.type === 'image') {
             return (
             <View style={{ padding: 20, backgroundColor: COLOR.secondBackground, borderRadius: 10 }}>
@@ -53,7 +54,7 @@ const CustomCarousel = ({images, videos, isVisible, onClose }: CarouselProps) =>
         } else{
             return(
                 <View style={{ padding: 20, backgroundColor: COLOR.secondBackground, borderRadius: 10 }}>
-                    <Text>ASD</Text>
+                    <YoutubeIframe height={200} play={false} videoId={item.id}/>
                 </View>
             );
         }
