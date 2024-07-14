@@ -27,6 +27,7 @@ export const userLogin = createAsyncThunk(
         },
       },
     );
+    console.log(postAuthResponse.data.jwt)
     const payload = {
       userToken: postAuthResponse.data.jwt,
       refreshToken: postAuthResponse.data.refreshToken,
