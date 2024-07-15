@@ -9,6 +9,7 @@ enum Routes{
     FavsScreen = "FavsScreen",
     EditProfile = "EditProfile",
     ProfileInfo = "ProfileInfo",
-    InternetError = "InternetError"
+    InternetError = "InternetError",
+    NewCommmentScreen = "NewCommentScreen"
     }
 export default Routes;

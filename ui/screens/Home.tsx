@@ -6,11 +6,15 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import Routes from '../../Navigation/Routes';
 import InternalError from './errors/InternalError';
 import { COLOR } from '../styles/Theme';
+import { useSelector } from 'react-redux';
 
 const Home = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [homeLoaded, setHomeLoaded] = useState<boolean>(false);
+  const {userInfo, userToken, refreshToken} = useSelector(
+    (state: any) => state.auth,
+  );
   const loadHome = async () => {
     return false;//forzar pagina de error ya que el home no esta hecho
   }
@@ -18,6 +22,7 @@ const Home = () => {
     if(!homeLoaded){
       loadHome().then(status => {setHomeLoaded((status === null) ? false : status)});
     }
+    console.log(userToken)
   }, [homeLoaded]);
   return (
     <SafeAreaView style={homeStyles.container}>

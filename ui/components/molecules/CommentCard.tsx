@@ -6,7 +6,7 @@ import { CommentHeader } from "./CommentHeader"
 import { Comment } from "../../screens/Details"
 
 interface Props {
-    comment: Comment
+    comment: Comment,
 }
 
 
@@ -22,15 +22,12 @@ export const CommentCard = (props : Props) => {
                 <View style={styles.header}>
                     
                 </View>
-                <CommentHeader></CommentHeader>
+                <CommentHeader qualification={props.comment.qualification} userID={props.comment.userID}></CommentHeader>
                  
                 {/* Content */}
                 <View style={styles.content}>
                     <Text style={styles.text}>
-                        A Computer Science portal for geeks. 
-                        It contains well written, well thought 
-                        and well explained computer science 
-                        and programming articles
+                        {props.comment.message}
                     </Text>
                 </View>
             </View>

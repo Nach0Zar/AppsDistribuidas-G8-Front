@@ -6,8 +6,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  ScrollView,
+  ToastAndroid,
+  Pressable,
   StyleSheet,
+  TextInput,
+  Button,
+  FlatList,
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
@@ -22,8 +26,21 @@ import {
   faHeart,
   faShareNodes,
 } from '@fortawesome/free-solid-svg-icons';
+import {faHeart as regularHeart} from '@fortawesome/free-regular-svg-icons';
 import COLORS from '../styles/Theme';
-import {TabViewExample} from '../../Navigation/DetailsNavigation';
+import {useSelector, useDispatch} from 'react-redux';
+import {
+  logout,
+  setUserToken,
+  updateFavoritesList,
+} from '../../redux/slices/authSlice';
+import InternalError from './errors/InternalError';
+import Share from 'react-native-share';
+import {useToast} from 'react-native-toast-notifications';
+import CustomCarousel from '../components/organisms/CustomCarousel';
+import {ImageProperties} from '../models/ImageProperties';
+import { Comments } from '../components/organisms/Comments';
+import { Cast } from '../components/organisms/Cast';
 
 export interface MovieProps {
   route: {
@@ -39,24 +56,18 @@ interface Genre {
 }
 
 export interface Comment {
-  id: String,
-  message: String,
-  qualification: number,
-  userImage : String,
-  username : String,
-  date : String,
-  userID : String
+  id: String;
+  message: String;
+  qualification: number;
+  userImage: String;
+  username: String;
+  date: String;
+  userID: String;
 }
 
 interface Person {
   name: String;
   department: String;
-}
-interface ImageProperties {
-  aspect_ratio: number;
-  height: number;
-  width: number;
-  file_path: String;
 }
 interface Movie {
   id: String;
@@ -80,7 +91,118 @@ const Details = (props: MovieProps) => {
   const navigation = useNavigation();
   const [loadedMovie, setLoadedMovie] = useState<boolean>(false);
   const [movie, setMovie] = useState<Movie | null>(null);
+  const [favorite, setFavorite] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [showCarousel, setShowCarousel] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<String>('');
+  const toast = useToast();
   const {id} = props.route.params;
+  const dispatch = useDispatch();
+  const {userInfo, userToken, refreshToken} = useSelector(
+    (state: any) => state.auth,
+  );
+  const loadProfileInfo = async () => {
+    navigation.dispatch(StackActions.replace(Routes.HomeScreen));
+  };
+  const handleShare = async () => {
+    let message =
+      'Hola! Te comparto esta pelicula llamada ' +
+      (movie == null ? 'undefined' : movie!.title);
+    const shareOptions: any = {
+      title: 'Share via',
+      message: message,
+    };
+    try {
+      await Share.open(shareOptions);
+      toast.show('Pelicula compartida correctamente!', {
+        type: 'success',
+        placement: 'bottom',
+        duration: 3000,
+        animationType: 'slide-in',
+      });
+    } catch (error: any) {
+      let toastMessage;
+      let type;
+      if (error.toString().includes('User did not share')) {
+        toastMessage = 'Compartir pelicula cancelado!';
+        type = 'warning';
+      } else {
+        toastMessage = 'Compartir pelicula fallo!';
+        type = 'danger';
+      }
+      toast.show(toastMessage, {
+        type: type,
+        placement: 'bottom',
+        duration: 3000,
+        animationType: 'slide-in',
+      });
+    }
+  };
+  const handleRefreshToken = async () => {
+    try {
+      let connectionStatus = await ConnectionStatus();
+      if (!connectionStatus) {
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
+      const refreshTokenResponse = await axios.put(Global.BASE_URL + '/auths', {
+        headers: {
+          Authorization: refreshToken,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (refreshTokenResponse.status === 200) {
+        dispatch(setUserToken(refreshTokenResponse));
+      }
+    } catch (error) {
+      dispatch(logout());
+    }
+  };
+  const handleFavorite = async () => {
+    let connectionStatus = await ConnectionStatus();
+    if (!connectionStatus) {
+      navigation.dispatch(StackActions.replace(Routes.InternetError));
+    }
+    setFavorite(!favorite);
+    try {
+      let response;
+      if (!favorite) {
+        response = await axios.post(
+          Global.BASE_URL + '/users/favorites/' + id,
+          {},
+          {
+            headers: {
+              Authorization: userToken,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+      } else {
+        response = await axios.delete(
+          Global.BASE_URL + '/users/favorites/' + id,
+          {
+            headers: {
+              Authorization: userToken,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+      }
+      let newList: any[] = [];
+      response.data.forEach((movie: any) => {
+        newList.push(movie.id);
+      });
+      dispatch(updateFavoritesList(newList));
+    } catch (error: any) {
+      if (error.response && error.response.status === 403) {
+        handleRefreshToken();
+      } else {
+        setError(true);
+        setErrorMessage(
+          `Mensaje: ${error.message} \nCodigo de error:  ${error.code}`,
+        );
+      }
+    }
+  };
   useEffect(() => {
     const getMovieInformation = async () => {
       let connectionStatus = await ConnectionStatus();
@@ -108,13 +230,13 @@ const Details = (props: MovieProps) => {
       });
       movieData.comments.forEach((comment: any) => {
         comments.push({
-          userID: comment.userID,
+          userID: comment.userId,
           message: comment.message,
           date: comment.date,
           qualification: comment.qualification,
           id: comment.id,
           userImage: '',
-          username : ''
+          username: '',
         });
       });
       movieData.images.forEach((image: any) => {
@@ -140,7 +262,7 @@ const Details = (props: MovieProps) => {
         duration = movieData.duration + ' min';
       }
       let release_year = movieData.release_date.substring(0, 4);
-
+      userInfo.favorites?.includes(id) && setFavorite(true);
       setMovie({
         id: movieData.id,
         title: movieData.title,
@@ -163,125 +285,197 @@ const Details = (props: MovieProps) => {
     if (!loadedMovie) {
       getMovieInformation();
     }
-  }, [loadedMovie]);
+  }, [loadedMovie, favorite, error, showCarousel]);
+
+  const [activeTab, setActiveTab] = useState('Reparto');
 
   return (
-    <SafeAreaView style={detailsStyle.container}>
-      <View style={detailsStyle.header}>
-        <View style={{flex: 1, flexBasis: '65%'}}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <FontAwesomeIcon
-              icon={faAngleLeft}
-              size={24}
-              color={COLORS.white}
-            />
-          </TouchableOpacity>
-        </View>
-        {loadedMovie && (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
-            <TouchableOpacity>
-              <FontAwesomeIcon icon={faHeart} size={24} color={COLORS.white} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <FontAwesomeIcon
-                icon={faShareNodes}
-                size={24}
-                color={COLORS.white}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      {loadedMovie ? (
-        /*
-    <View style={detailsStyle.container}>
-      <View style={detailsStyle.imageContainer}>
-        <Image source={{uri: "https://image.tmdb.org/t/p/original" + movie!.default_poster.file_path}} style={detailsStyle.image}/>
-      </View>
-      <View style={detailsStyle.detailsContainer}>
-        <Text style={detailsStyle.title}>{movie!.title}</Text>
-        <Text style={detailsStyle.subtitle}>{movie!.subtitle}</Text>
-        <View style={detailsStyle.labelContainer}>
-          <Text style={detailsStyle.label}>{movie!.release_date}</Text>
-          <Text style={detailsStyle.label}>|</Text>
-          <Text style={detailsStyle.label}>{movie!.duration}</Text>
-          <Text style={detailsStyle.label}>|</Text>
-          <Text style={detailsStyle.label}>{movie!.genre.name}</Text>
-          <Text style={detailsStyle.label}>|</Text>
-          <Text style={detailsStyle.label}>{movie!.qualification}({movie!.qualifiers})</Text>
-        </View>
-        <View
-          style={detailsStyle.hr}
-        />
-        <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
-      </View>
-      <ScrollView style={detailsStyle.casters}>
-        <Text style={detailsStyle.synopsis}>asd</Text>
-        
-        <TabViewExample />
-        
-      </ScrollView>
-      
-    </View>
-    */
-
-        <ScrollView style={style.container}>
-          <View style={detailsStyle.imageContainer}>
-            <Image
-              source={{
-                uri:
-                  'https://image.tmdb.org/t/p/original' +
-                  movie!.default_poster.file_path,
-              }}
-              style={detailsStyle.image}
-            />
-          </View>
-          <View style={detailsStyle.detailsContainer}>
-            <Text style={detailsStyle.title}>{movie!.title}</Text>
-            <Text style={detailsStyle.subtitle}>{movie!.subtitle}</Text>
-            <View style={detailsStyle.labelContainer}>
-              <Text style={detailsStyle.label}>{movie!.release_date}</Text>
-              <Text style={detailsStyle.label}>|</Text>
-              <Text style={detailsStyle.label}>{movie!.duration}</Text>
-              <Text style={detailsStyle.label}>|</Text>
-              <Text style={detailsStyle.label}>{movie!.genre.name}</Text>
-              <Text style={detailsStyle.label}>|</Text>
-              <Text style={detailsStyle.label}>
-                {movie!.qualification}({movie!.qualifiers})
-              </Text>
+    <>
+      {!error ? (
+        <SafeAreaView style={detailsStyle.container}>
+          <View style={detailsStyle.header}>
+            <View style={{flex: 1, flexBasis: '65%'}}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <FontAwesomeIcon
+                  icon={faAngleLeft}
+                  size={24}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
             </View>
-            <View style={detailsStyle.hr} />
-            <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
+            {loadedMovie && (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <TouchableOpacity onPress={() => handleFavorite()}>
+                  <FontAwesomeIcon
+                    icon={favorite ? faHeart : regularHeart}
+                    size={24}
+                    color={COLORS.white}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleShare()}>
+                  <FontAwesomeIcon
+                    icon={faShareNodes}
+                    size={24}
+                    color={COLORS.white}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-          <ScrollView>
-            <TabViewExample />
-          </ScrollView>
-        </ScrollView>
+          {loadedMovie ? (
+            <View style={detailsStyle.container}>
+              <View style={detailsStyle.imageContainer}>
+                <Pressable
+                  onPress={() => {
+                    setShowCarousel(true);
+                  }}>
+                  <Image
+                    source={{
+                      uri:
+                        'https://image.tmdb.org/t/p/original' +
+                        movie!.default_poster.file_path,
+                    }}
+                    style={detailsStyle.image}
+                  />
+                </Pressable>
+              </View>
+              <View style={detailsStyle.detailsContainer}>
+                <Text style={detailsStyle.title}>{movie!.title}</Text>
+                <Text style={detailsStyle.subtitle}>{movie!.subtitle}</Text>
+                <View style={detailsStyle.labelContainer}>
+                  <Text style={detailsStyle.label}>{movie!.release_date}</Text>
+                  <Text style={detailsStyle.label}>|</Text>
+                  <Text style={detailsStyle.label}>{movie!.duration}</Text>
+                  <Text style={detailsStyle.label}>|</Text>
+                  <Text style={detailsStyle.label}>{movie!.genre.name}</Text>
+                  <Text style={detailsStyle.label}>|</Text>
+                  <Text style={detailsStyle.label}>
+                    {movie!.qualification}({movie!.qualifiers})
+                  </Text>
+                </View>
+                <View style={detailsStyle.hr} />
+                <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
+              </View>
+              <View style={detailsStyle.commentsAndPeopleContainer}>
+                <View style={styles.tabContainer}>
+                <TouchableOpacity onPress={() => setActiveTab('Reparto')}>
+                  <Text style={[styles.tab, activeTab === 'Reparto' && styles.activeTab]}>Reparto</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setActiveTab('Comentarios')}>
+                  <Text style={[styles.tab, activeTab === 'Comentarios' && styles.activeTab]}>Comentarios</Text>
+                </TouchableOpacity>
+                </View>
+                {activeTab === 'Reparto' ? <Cast crew={movie!.crew} cast={movie!.cast} /> : <Comments comments={movie!.comments} />}
+                  
+              </View>
+              <CustomCarousel
+                images={movie!.images}
+                videos={movie!.videos}
+                isVisible={showCarousel}
+                onClose={() => {
+                  setShowCarousel(false);
+                }}
+              />
+            </View>
+          ) : (
+            <ActivityIndicator
+              size="large"
+              color={COLOR.second}
+              style={{flex: 1}}
+            />
+          )}
+        </SafeAreaView>
       ) : (
-        <ActivityIndicator
-          size="large"
-          color={COLOR.second}
-          style={{flex: 1}}
-        />
+        <View style={{flex: 1}}>
+          <InternalError onButtonClick={loadProfileInfo} />
+        </View>
       )}
-    </SafeAreaView>
+    </>
   );
 };
 
-const style = StyleSheet.create({
+
+// Estilos
+const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: COLOR.primaryBackground,
+    padding: 20,
+    backgroundColor: '#2C2C2C',
+    flex: 1
   },
-  container2: {
-    flex: 1,
-    backgroundColor: 'yellow',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF'
+  },
+  details: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  rating: {
+    fontSize: 16,
+    marginVertical: 10,
+    color: '#FFD700'
+  },
+  synopsis: {
+    fontSize: 16,
+    marginVertical: 10,
+    color: '#FFFFFF'
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    color: '#FFFFFF'
+  },
+  castItem: {
+    fontSize: 16,
+    marginVertical: 5,
+    color: '#FFFFFF'
+  },
+  commentItem: {
+    marginVertical: 10,
+    backgroundColor: '#3C3C3C',
+    padding: 10,
+    borderRadius: 5
+  },
+  commentUser: {
+    fontWeight: 'bold',
+    color: '#FFD700'
+  },
+  commentRating: {
+    marginVertical: 5,
+    color: '#FFD700'
+  },
+  input: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF'
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 20,
+  },
+  tab: {
+    fontSize: 18,
+    color: 'gray',
+    paddingBottom: 5,
+  },
+  activeTab: {
+    color: COLOR.second,
+    borderBottomWidth: 2,
+    borderBottomColor: COLOR.primary,
   },
 });
+
+
 
 export default Details;

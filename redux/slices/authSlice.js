@@ -18,11 +18,12 @@ const authSlice = createSlice({
             state.loading = action.payload;
         },
         setUserInfo: (state, {payload}) => {
-            const {firstname, lastname, email, nickname} = payload
+            const {firstname, lastname, email, nickname, favorites} = payload
             state.userInfo.firstname = firstname;
             state.userInfo.lastname = lastname;
             state.userInfo.email = email;
             state.userInfo.nickname = nickname;
+            state.userInfo.favorites = favorites;
         },
         setUserImage : (state, {payload}) => {
             state.userInfo.image = payload;
@@ -40,6 +41,9 @@ const authSlice = createSlice({
         },
         setUserToken : (state, action) => {
             state.userToken = action.payload
+        },
+        updateFavoritesList : (state, action) => {
+            state.userInfo.favorites = action.payload
         }
     },
     extraReducers: (builder) => {
@@ -62,6 +66,6 @@ const authSlice = createSlice({
     }
 })
 
-export const {isLoading, logout, setUserInfo, setRefreshToken, setUserImage, setUserToken} = authSlice.actions;
+export const {isLoading, logout, setUserInfo, setRefreshToken, setUserImage, setUserToken, updateFavoritesList} = authSlice.actions;
 
 export default authSlice.reducer;
