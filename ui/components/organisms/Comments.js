@@ -12,7 +12,7 @@ export const Comments = ({ comments, movieId }) => {
   const navigation = useNavigation();
   
     const handleAddComment = () => {
-      navigation.navigate(Routes.NewCommmentScreen, {movieId: 3});
+      navigation.navigate(Routes.NewCommmentScreen, {movieId: movieId});
     };
     
   
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLOR.second,
         borderRadius: 5,
         width: '100%',
-        height: '13%',
+        height: '17%',
         marginBottom: 5,
         bottom: 0,
         flexDirection: 'column',

@@ -10,15 +10,14 @@ const detailsStyle = StyleSheet.create({
   },
   imageContainer:{
     flex: 1,
-    //flexBasis: '38%',
+    flexBasis: '38%',
   },
   detailsContainer:{
     flex: 1,
     justifyContent: 'flex-start',
     width: width * 0.95,
     alignSelf: 'center',
-    flexBasis: '19%',
-    
+    flexBasis: '15%'
   },
   commentsAndPeopleContainer:{
     flex: 1,
@@ -74,8 +73,7 @@ const detailsStyle = StyleSheet.create({
     fontWeight: 'medium',
     fontFamily: 'roboto',
     paddingTop: 10,
-    paddingBottom: 10,
-    backgroundColor: 'red'
+    paddingBottom: 3
   },
   hr: {
     borderBottomColor: COLOR.second,

@@ -39,8 +39,8 @@ import Share from 'react-native-share';
 import {useToast} from 'react-native-toast-notifications';
 import CustomCarousel from '../components/organisms/CustomCarousel';
 import {ImageProperties} from '../models/ImageProperties';
-import { Comments } from '../components/organisms/Comments';
-import { Cast } from '../components/organisms/Cast';
+import {Comments} from '../components/organisms/Comments';
+import {Cast} from '../components/organisms/Cast';
 
 export interface MovieProps {
   route: {
@@ -63,6 +63,7 @@ export interface Comment {
   username: String;
   date: String;
   userID: String;
+  movieID : String;
 }
 
 interface Person {
@@ -235,6 +236,7 @@ const Details = (props: MovieProps) => {
           date: comment.date,
           qualification: comment.qualification,
           id: comment.id,
+          movieID: id,
           userImage: '',
           username: '',
         });
@@ -285,6 +287,7 @@ const Details = (props: MovieProps) => {
     if (!loadedMovie) {
       getMovieInformation();
     }
+    
   }, [loadedMovie, favorite, error, showCarousel]);
 
   const [activeTab, setActiveTab] = useState('Reparto');
@@ -361,18 +364,7 @@ const Details = (props: MovieProps) => {
                 <View style={detailsStyle.hr} />
                 <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
               </View>
-              <View style={detailsStyle.commentsAndPeopleContainer}>
-                <View style={styles.tabContainer}>
-                <TouchableOpacity onPress={() => setActiveTab('Reparto')}>
-                  <Text style={[styles.tab, activeTab === 'Reparto' && styles.activeTab]}>Reparto</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setActiveTab('Comentarios')}>
-                  <Text style={[styles.tab, activeTab === 'Comentarios' && styles.activeTab]}>Comentarios</Text>
-                </TouchableOpacity>
-                </View>
-                {activeTab === 'Reparto' ? <Cast crew={movie!.crew} cast={movie!.cast} /> : <Comments comments={movie!.comments} />}
-                  
-              </View>
+
               <CustomCarousel
                 images={movie!.images}
                 videos={movie!.videos}
@@ -381,6 +373,34 @@ const Details = (props: MovieProps) => {
                   setShowCarousel(false);
                 }}
               />
+
+              <View style={detailsStyle.commentsAndPeopleContainer}>
+                <View style={styles.tabContainer}>
+                  <TouchableOpacity onPress={() => setActiveTab('Reparto')}>
+                    <Text
+                      style={[
+                        styles.tab,
+                        activeTab === 'Reparto' && styles.activeTab,
+                      ]}>
+                      Reparto
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setActiveTab('Comentarios')}>
+                    <Text
+                      style={[
+                        styles.tab,
+                        activeTab === 'Comentarios' && styles.activeTab,
+                      ]}>
+                      Comentarios
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {activeTab === 'Reparto' ? (
+                  <Cast crew={movie!.crew} cast={movie!.cast} />
+                ) : (
+                  <Comments movieId={movie?.id} comments={movie!.comments} />
+                )}
+              </View>
             </View>
           ) : (
             <ActivityIndicator
@@ -399,66 +419,8 @@ const Details = (props: MovieProps) => {
   );
 };
 
-
 // Estilos
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#2C2C2C',
-    flex: 1
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF'
-  },
-  details: {
-    fontSize: 16,
-    color: 'gray',
-  },
-  rating: {
-    fontSize: 16,
-    marginVertical: 10,
-    color: '#FFD700'
-  },
-  synopsis: {
-    fontSize: 16,
-    marginVertical: 10,
-    color: '#FFFFFF'
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20,
-    color: '#FFFFFF'
-  },
-  castItem: {
-    fontSize: 16,
-    marginVertical: 5,
-    color: '#FFFFFF'
-  },
-  commentItem: {
-    marginVertical: 10,
-    backgroundColor: '#3C3C3C',
-    padding: 10,
-    borderRadius: 5
-  },
-  commentUser: {
-    fontWeight: 'bold',
-    color: '#FFD700'
-  },
-  commentRating: {
-    marginVertical: 5,
-    color: '#FFD700'
-  },
-  input: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-    backgroundColor: '#FFFFFF'
-  },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -475,7 +437,5 @@ const styles = StyleSheet.create({
     borderBottomColor: COLOR.primary,
   },
 });
-
-
 
 export default Details;
