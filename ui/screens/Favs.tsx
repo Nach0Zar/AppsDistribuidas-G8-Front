@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useCallback  } from 'react';
 import { View, Text,Image, TextInput, StyleSheet, ActivityIndicator, SafeAreaView, FlatList, Dimensions } from 'react-native';
 import favsStyles from '../styles/favsStyles';
-import { useNavigation, StackActions } from '@react-navigation/native';
+import { useNavigation, StackActions,useFocusEffect } from '@react-navigation/native';
 import MovieCard from '../components/atoms/MovieCard';
 import axios from 'axios';
 import ConnectionStatus from '../assets/ConnectionStatus';
 import Routes from '../../Navigation/Routes';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import { Global } from '../../Constants';
-import { COLOR } from '../styles/Theme';
+import COLORS from '../styles/Theme';
+import {useSelector} from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
@@ -17,12 +18,24 @@ const Favs = () => {
   const [showNoResults, setShowNoResults] = useState(false);
   const [movies, setMovies] = useState<Array<any>>([]);
   const [loading, setLoading] = useState(false);
+  const {userToken, error} = useSelector((state: { auth: {userToken: string | null; error: string | null } }) => state.auth);
 
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
-  useEffect(() => {
-    getMovies();
-  }, []);
+  const checkUserTokenAndFetchMovies = useCallback(() => {
+    setMovies([])
+    if (userToken == null) {
+      navigation.dispatch(StackActions.replace(Routes.LoginScreen));
+    } else {
+      getMovies();
+    }
+  }, [userToken, navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkUserTokenAndFetchMovies();
+    }, [checkUserTokenAndFetchMovies])
+  );
 
   const getMovies = async () => { 
     setLoading(true);
@@ -32,7 +45,15 @@ const Favs = () => {
       if(!connectionStatus){
         navigation.dispatch(StackActions.replace(Routes.InternetError));
       }
-      const response = await axios.get(url);
+      const response = await axios.get(
+        url,
+        {
+          headers: {
+            "Authorization" : userToken,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       const movies = response.data
       if(movies.constructor === Array){
         setMovies((prevMovies) => [...prevMovies, ...movies]);
@@ -46,6 +67,7 @@ const Favs = () => {
       setShowMovies(true);
     } 
     catch(error) {
+      console.log(error)
       setShowNoResults(true);
       setShowMovies(false);
     }
@@ -63,7 +85,7 @@ const Favs = () => {
       </View>
       {loading && (
         <View style={favsStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLOR.secondBackground} style={favsStyles.activityIndicator} />
+          <ActivityIndicator size="large" color={COLORS.green} style={favsStyles.activityIndicator} />
         </View>
       )}
       {showNoResults && (
