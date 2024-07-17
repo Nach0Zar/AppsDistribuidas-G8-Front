@@ -10,7 +10,7 @@ export const Cast = ({ crew ,cast }) => {
             return (<Text style={styles.crewMember} key={idx}>{d.name}</Text>)
             })}
         </View>
-        <Text style={styles.sectionTitle}>Director</Text>
+        <Text style={styles.sectionTitle}>Director y Crew</Text>
         <View style={styles.crewContainer}>
             {crew.map(function(d, idx){
             return (<Text style={styles.crewMember} key={idx}>{d.name}</Text>)
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     sectionTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      marginTop: 20,
       color: '#FFFFFF'
     },
     castItem: {

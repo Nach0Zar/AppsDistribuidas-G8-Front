@@ -6,12 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  ToastAndroid,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  Button,
-  FlatList,
+  ScrollView,
+  Pressable
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
@@ -372,7 +368,9 @@ const Details = (props: MovieProps) => {
                   </Text>
                 </View>
                 <View style={detailsStyle.hr} />
-                <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
+                <ScrollView>
+                  <Text style={detailsStyle.synopsis}>{movie!.synopsis}</Text>
+                </ScrollView>
               </View>
 
               <CustomCarousel
@@ -385,12 +383,12 @@ const Details = (props: MovieProps) => {
               />
 
               <View style={detailsStyle.commentsAndPeopleContainer}>
-                <View style={styles.tabContainer}>
+                <View style={detailsStyle.tabContainer}>
                   <TouchableOpacity onPress={() => setActiveTab('Reparto')}>
                     <Text
                       style={[
-                        styles.tab,
-                        activeTab === 'Reparto' && styles.activeTab,
+                        detailsStyle.tab,
+                        activeTab === 'Reparto' && detailsStyle.activeTab,
                       ]}>
                       Reparto
                     </Text>
@@ -398,8 +396,8 @@ const Details = (props: MovieProps) => {
                   <TouchableOpacity onPress={() => setActiveTab('Comentarios')}>
                     <Text
                       style={[
-                        styles.tab,
-                        activeTab === 'Comentarios' && styles.activeTab,
+                        detailsStyle.tab,
+                        activeTab === 'Comentarios' && detailsStyle.activeTab,
                       ]}>
                       Comentarios
                     </Text>
@@ -428,24 +426,5 @@ const Details = (props: MovieProps) => {
     </>
   );
 };
-
-// Estilos
-const styles = StyleSheet.create({
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 20,
-  },
-  tab: {
-    fontSize: 18,
-    color: 'gray',
-    paddingBottom: 5,
-  },
-  activeTab: {
-    color: COLOR.second,
-    borderBottomWidth: 2,
-    borderBottomColor: COLOR.primary,
-  },
-});
 
 export default Details;

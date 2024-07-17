@@ -10,14 +10,14 @@ const detailsStyle = StyleSheet.create({
   },
   imageContainer:{
     flex: 1,
-    flexBasis: '38%',
+    flexBasis: '28%',
   },
   detailsContainer:{
     flex: 1,
     justifyContent: 'flex-start',
     width: width * 0.95,
     alignSelf: 'center',
-    flexBasis: '15%'
+    flexBasis: '18%',
   },
   commentsAndPeopleContainer:{
     flex: 1,
@@ -78,11 +78,26 @@ const detailsStyle = StyleSheet.create({
   hr: {
     borderBottomColor: COLOR.second,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingBottom: 10
+    paddingBottom: 20
   },
   casters: {
     flex : 1
-  }
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 20,
+  },
+  tab: {
+    fontSize: 18,
+    color: 'gray',
+    paddingBottom: 5,
+  },
+  activeTab: {
+    color: COLOR.second,
+    borderBottomWidth: 2,
+    borderBottomColor: COLOR.primary,
+  },
 });
   
 export default detailsStyle;
