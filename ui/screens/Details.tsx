@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import {COLOR} from '../styles/Theme';
 import ConnectionStatus from '../assets/ConnectionStatus';
-import {useNavigation, StackActions} from '@react-navigation/native';
+import {useNavigation, StackActions, useIsFocused} from '@react-navigation/native';
 import Routes from '../../Navigation/Routes';
 import axios from 'axios';
 import {Global} from '../../Constants';
@@ -63,7 +63,7 @@ export interface Comment {
   username: String;
   date: String;
   userID: String;
-  movieID : String;
+  movieID: String;
 }
 
 interface Person {
@@ -94,6 +94,7 @@ const Details = (props: MovieProps) => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [favorite, setFavorite] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [refreshData, setRefreshData] = useState<boolean>(false);
   const [showCarousel, setShowCarousel] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<String>('');
   const toast = useToast();
@@ -102,6 +103,7 @@ const Details = (props: MovieProps) => {
   const {userInfo, userToken, refreshToken} = useSelector(
     (state: any) => state.auth,
   );
+  const isFocused = useIsFocused();
   const loadProfileInfo = async () => {
     navigation.dispatch(StackActions.replace(Routes.HomeScreen));
   };
@@ -204,91 +206,99 @@ const Details = (props: MovieProps) => {
       }
     }
   };
-  useEffect(() => {
-    const getMovieInformation = async () => {
-      let connectionStatus = await ConnectionStatus();
-      if (!connectionStatus) {
-        navigation.dispatch(StackActions.replace(Routes.InternetError));
-      }
-      const url = Global.BASE_URL + `/movies/${id}`;
-      const response = await axios.get(url);
-      const movieData = response.data;
-      let crew: Person[] = [],
-        cast: Person[] = [],
-        comments: Comment[] = [],
-        images: ImageProperties[] = [];
-      movieData.cast.forEach((castMember: any) => {
-        cast.push({
-          name: castMember.name,
-          department: castMember.department,
-        });
+
+  const getMovieInformation = async () => {
+    let connectionStatus = await ConnectionStatus();
+    if (!connectionStatus) {
+      navigation.dispatch(StackActions.replace(Routes.InternetError));
+    }
+    const url = Global.BASE_URL + `/movies/${id}`;
+    const response = await axios.get(url);
+    const movieData = response.data;
+    let crew: Person[] = [],
+      cast: Person[] = [],
+      comments: Comment[] = [],
+      images: ImageProperties[] = [];
+    movieData.cast.forEach((castMember: any) => {
+      cast.push({
+        name: castMember.name,
+        department: castMember.department,
       });
-      movieData.crew.forEach((crewMember: any) => {
-        crew.push({
-          name: crewMember.name,
-          department: crewMember.department,
-        });
+    });
+    movieData.crew.forEach((crewMember: any) => {
+      crew.push({
+        name: crewMember.name,
+        department: crewMember.department,
       });
-      movieData.comments.forEach((comment: any) => {
-        comments.push({
-          userID: comment.userId,
-          message: comment.message,
-          date: comment.date,
-          qualification: comment.qualification,
-          id: comment.id,
-          movieID: id,
-          userImage: '',
-          username: '',
-        });
+    });
+    movieData.comments.forEach((comment: any) => {
+      comments.push({
+        userID: comment.userId,
+        message: comment.message,
+        date: comment.date,
+        qualification: comment.qualification,
+        id: comment.id,
+        movieID: id,
+        userImage: '',
+        username: '',
       });
-      movieData.images.forEach((image: any) => {
-        images.push({
-          aspect_ratio: image.aspect_ratio,
-          height: image.height,
-          width: image.width,
-          file_path: image.file_path,
-        });
+    });
+    movieData.images.forEach((image: any) => {
+      images.push({
+        aspect_ratio: image.aspect_ratio,
+        height: image.height,
+        width: image.width,
+        file_path: image.file_path,
       });
-      let duration;
-      if (movieData.duration > 59) {
-        if (movieData.duration % 60 == 0) {
-          duration = Math.floor(movieData.duration / 60) + 'h ';
-        } else {
-          duration =
-            Math.floor(movieData.duration / 60) +
-            'h ' +
-            (movieData.duration % 60) +
-            ' min';
-        }
+    });
+    let duration;
+    if (movieData.duration > 59) {
+      if (movieData.duration % 60 == 0) {
+        duration = Math.floor(movieData.duration / 60) + 'h ';
       } else {
-        duration = movieData.duration + ' min';
+        duration =
+          Math.floor(movieData.duration / 60) +
+          'h ' +
+          (movieData.duration % 60) +
+          ' min';
       }
-      let release_year = movieData.release_date.substring(0, 4);
-      userInfo.favorites?.includes(id) && setFavorite(true);
-      setMovie({
-        id: movieData.id,
-        title: movieData.title,
-        subtitle: movieData.subtitle,
-        synopsis: movieData.synopsis,
-        genre: movieData.genre,
-        default_poster: movieData.default_poster,
-        images: images,
-        videos: movieData.videos,
-        release_date: release_year,
-        duration: duration,
-        qualification: movieData.qualification,
-        qualifiers: movieData.qualifiers,
-        cast: cast,
-        crew: crew,
-        comments: comments,
-      });
-      setLoadedMovie(true);
-    };
-    if (!loadedMovie) {
+    } else {
+      duration = movieData.duration + ' min';
+    }
+    let release_year = movieData.release_date.substring(0, 4);
+    userInfo.favorites?.includes(id) && setFavorite(true);
+    setMovie({
+      id: movieData.id,
+      title: movieData.title,
+      subtitle: movieData.subtitle,
+      synopsis: movieData.synopsis,
+      genre: movieData.genre,
+      default_poster: movieData.default_poster,
+      images: images,
+      videos: movieData.videos,
+      release_date: release_year,
+      duration: duration,
+      qualification: movieData.qualification,
+      qualifiers: movieData.qualifiers,
+      cast: cast,
+      crew: crew,
+      comments: comments,
+    });
+    setLoadedMovie(true);
+  };
+  if (!loadedMovie) {
+    getMovieInformation();
+  }
+
+  useEffect(() => {
+    if(isFocused) {
       getMovieInformation();
     }
-    
-  }, [loadedMovie, favorite, error, showCarousel]);
+  }, [isFocused])
+
+  useEffect(() => {
+    getMovieInformation();
+  }, [loadedMovie, favorite, error, showCarousel, refreshData]);
 
   const [activeTab, setActiveTab] = useState('Reparto');
 

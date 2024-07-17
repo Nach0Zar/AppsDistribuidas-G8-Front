@@ -12,7 +12,7 @@ export const Comments = ({ comments, movieId }) => {
   const navigation = useNavigation();
   
     const handleAddComment = () => {
-      navigation.navigate(Routes.NewCommmentScreen, {movieId: movieId});
+      navigation.navigate(Routes.NewCommmentScreen, {movieId: movieId}, );
     };
     
   
