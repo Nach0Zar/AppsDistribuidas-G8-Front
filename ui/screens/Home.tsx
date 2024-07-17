@@ -10,6 +10,7 @@ import { Global } from '../../Constants';
 import axios from 'axios';
 import MovieCard from '../components/atoms/MovieCard';
 import { COLOR } from '../styles/Theme';
+import { useSelector } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
@@ -89,7 +90,6 @@ const Home = () => {
     } catch (error) {
       console.error('Error fetching new movies:', error);
     }
-
     //fetching movies for comedy, drama and thriller
     const landingGenres = [
       { id: '6647569ea016595c56fef138', name: 'Comedy', setter: setComedyMovies },
