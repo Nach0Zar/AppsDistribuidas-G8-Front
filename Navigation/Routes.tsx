@@ -2,6 +2,7 @@ enum Routes{
     LoginScreen = "LoginScreen",
     LandingStack = "LandingStack",
     HomeStack = "HomeStack",
+    FavStack = "FavStack",
     ProfileStack = "ProfileStack",
     HomeScreen = "HomeScreen",
     DetailsScreen = "DetailsScreen",

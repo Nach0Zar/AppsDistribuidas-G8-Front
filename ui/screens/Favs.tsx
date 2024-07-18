@@ -29,7 +29,7 @@ const Favs = () => {
     } else {
       getMovies();
     }
-  }, [userToken, navigation]);
+  }, [userToken]);
 
   useFocusEffect(
     useCallback(() => {

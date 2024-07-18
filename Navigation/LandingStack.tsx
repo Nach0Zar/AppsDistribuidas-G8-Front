@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeStack from './HomeStack';
-import Favs from "../ui/screens/Favs";
+import FavStack from "./FavStack";
 import Routes from "./Routes";
 import ProfileStack from "./ProfileStack";
 import { COLOR } from "../ui/styles/Theme";
@@ -43,8 +43,8 @@ const LandingStack = () => {
         }}
       />
       <Tab.Screen
-        name={Routes.FavsScreen}
-        component={Favs}
+        name={Routes.FavStack}
+        component={FavStack}
         options={{
           tabBarLabel: '',
           tabBarIcon: ({focused, color, size}) => (

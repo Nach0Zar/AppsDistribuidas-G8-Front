@@ -6,6 +6,7 @@ import LandingStack from './LandingStack';
 import HomeStack from './HomeStack';
 import Routes from "./Routes";
 import InternetError from "../ui/screens/errors/InternetError";
+import FavStack from "./FavStack";
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,10 @@ const RootNavigator = () => {
         <Stack.Screen
           name={Routes.HomeStack}
           component={HomeStack}
+        />
+        <Stack.Screen
+          name={Routes.FavStack}
+          component={FavStack}
         />
         <Stack.Screen
           name={Routes.InternetError}
