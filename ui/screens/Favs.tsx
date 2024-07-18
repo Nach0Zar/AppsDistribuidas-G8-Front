@@ -1,5 +1,5 @@
 import React, { useState,useCallback  } from 'react';
-import { View, Text,Image, TextInput, StyleSheet, ActivityIndicator, SafeAreaView, FlatList, Dimensions } from 'react-native';
+import { View, Text,Image, TextInput, ActivityIndicator, SafeAreaView, FlatList, Dimensions } from 'react-native';
 import favsStyles from '../styles/favsStyles';
 import { useNavigation, StackActions,useFocusEffect } from '@react-navigation/native';
 import MovieCard from '../components/atoms/MovieCard';
@@ -8,11 +8,9 @@ import ConnectionStatus from '../assets/ConnectionStatus';
 import Routes from '../../Navigation/Routes';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import { Global } from '../../Constants';
-import COLORS from '../styles/Theme';
+import { COLOR } from '../styles/Theme';
 import { logout, setUserToken } from '../../redux/slices/authSlice';
 import {useSelector,useDispatch} from 'react-redux';
-import GoogleSignIn from '../assets/GoogleSignIn';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -112,7 +110,7 @@ const handleRefreshToken = async () => {
       </View>
       {loading && (
         <View style={favsStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.green} style={favsStyles.activityIndicator} />
+          <ActivityIndicator size="large" color={COLOR.second} style={favsStyles.activityIndicator} />
         </View>
       )}
       {showNoResults && (
