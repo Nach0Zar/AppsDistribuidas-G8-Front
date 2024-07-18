@@ -70,7 +70,7 @@ const detailsStyle = StyleSheet.create({
   ,
   label: {
     fontSize: 16,
-    height: 18,
+    height: 20,
     color: COLOR.second,
     fontWeight: 'medium',
     fontFamily: 'roboto'
