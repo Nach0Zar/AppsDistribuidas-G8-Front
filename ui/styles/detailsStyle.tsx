@@ -59,7 +59,15 @@ const detailsStyle = StyleSheet.create({
     justifyContent: 'space-between', 
     alignItems: 'center',
     maxHeight: 20
-},
+  },
+  ratingContainer: {
+    flex:1, 
+    flexDirection: 'row', 
+    maxWidth: 90, 
+    justifyContent: 'space-around', 
+    alignContent: 'center'
+  }
+  ,
   label: {
     fontSize: 16,
     height: 18,

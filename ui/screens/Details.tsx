@@ -363,9 +363,17 @@ const Details = (props: MovieProps) => {
                   <Text style={detailsStyle.label}>|</Text>
                   <Text style={detailsStyle.label}>{movie!.genre.name}</Text>
                   <Text style={detailsStyle.label}>|</Text>
-                  <Text style={detailsStyle.label}>
-                    {movie!.qualification}({movie!.qualifiers})
-                  </Text>
+                  <View style={detailsStyle.ratingContainer}>
+                    <Image
+                      source={require('../../assets/images/star.png')}
+                      style={{
+                        maxHeight: 16,
+                        maxWidth: 16,
+                        resizeMode: 'cover'}}
+                    /><Text style={detailsStyle.label}>
+                      {movie!.qualification}({movie!.qualifiers})
+                    </Text>
+                  </View>
                 </View>
                 <View style={detailsStyle.hr} />
                 <ScrollView>
