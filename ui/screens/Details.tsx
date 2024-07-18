@@ -371,7 +371,7 @@ const Details = (props: MovieProps) => {
                         maxWidth: 16,
                         resizeMode: 'cover'}}
                     /><Text style={detailsStyle.label}>
-                      {movie!.qualification}({movie!.qualifiers})
+                      {Math.round(movie!.qualification*1000)/1000}({movie!.qualifiers})
                     </Text>
                   </View>
                 </View>
