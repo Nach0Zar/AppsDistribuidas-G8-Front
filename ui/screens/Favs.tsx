@@ -67,7 +67,7 @@ const Favs = () => {
         setShowMovies(false);
       }
     } 
-    catch(error) {
+    catch(error: any) {
       console.log(error)
       setMovies([]);
       setShowNoResults(true);
