@@ -175,12 +175,9 @@ const Home = () => {
               {genres.map(renderGenreChip)}
             </ScrollView>
           </View>
-          <View style={{flex: 1}}>
+          <View style={{flex: 1, alignItems:'center'}}>
             {selectedGenre ? (
               <View style={{paddingVertical: 8, alignItems:'center'}}>
-                {loadingMovies ? (
-                  <ActivityIndicator size="large" color={COLOR.second} />
-                ) : (
                   <FlatList
                     data={movies}
                     keyExtractor={(item) => item['id']}
@@ -190,13 +187,14 @@ const Home = () => {
                     columnWrapperStyle={{ gap: width * 0.0512 }}
                     onEndReached={() => {
                       if ( hasMorePages ){
+                        setLoadingMovies(true)
                         setPage((prevPage) => prevPage + 1);
                         getMovies(selectedGenre, page + 1);
                       }
                     }}
                     onEndReachedThreshold={0.5}
+                    ListFooterComponent = {() => loadingMovies && <ActivityIndicator size="large" color={COLOR.second} />}
                   />
-                )}
               </View>
             ) : (
               <FlatList
