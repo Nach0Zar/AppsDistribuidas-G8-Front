@@ -9,7 +9,10 @@ import Routes from '../../Navigation/Routes';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import { Global } from '../../Constants';
 import COLORS from '../styles/Theme';
-import {useSelector} from 'react-redux';
+import { logout, setUserToken } from '../../redux/slices/authSlice';
+import {useSelector,useDispatch} from 'react-redux';
+import GoogleSignIn from '../assets/GoogleSignIn';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,8 +21,9 @@ const Favs = () => {
   const [showNoResults, setShowNoResults] = useState(false);
   const [movies, setMovies] = useState<Array<any>>([]);
   const [loading, setLoading] = useState(false);
-  const {userToken, error} = useSelector((state: { auth: {userToken: string | null; error: string | null } }) => state.auth);
-
+  const {userToken,refreshToken, error} = useSelector((state: { auth: {userToken: string | null; refreshToken: string | null; error: string | null } }) => state.auth);
+  
+  const dispatch = useDispatch();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const checkUserTokenAndFetchMovies = useCallback(() => {
@@ -29,7 +33,7 @@ const Favs = () => {
     } else {
       getMovies();
     }
-  }, [userToken]);
+  }, [userToken, navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,25 +59,48 @@ const Favs = () => {
         }
       );
       const movies = response.data
-      if(movies.constructor === Array){
-        setMovies((prevMovies) => [...prevMovies, ...movies]);
+      if(movies.length === 0){
+        setShowNoResults(true);
+        setShowMovies(false);
       } 
       else {
-        let moviesList = []
-        moviesList[0] = movies
-        setMovies(moviesList)
+        setMovies([])
+        setMovies(movies)
+        setShowNoResults(false);
+        setShowMovies(true);
       }
-      setShowNoResults(false);
-      setShowMovies(true);
     } 
-    catch(error) {
-      console.log(error)
-      setShowNoResults(true);
-      setShowMovies(false);
+    catch(error:any) {
+      if(error.response && error.response.status === 403){
+        handleRefreshToken();
+      }
     }
     setLoading(false);
 };
 
+const handleRefreshToken = async () => {
+  try{
+    let connectionStatus = await ConnectionStatus()
+    if(!connectionStatus){
+      navigation.dispatch(StackActions.replace(Routes.InternetError));
+    }
+    let url = Global.BASE_URL + `/auths`
+    const refreshTokenResponse = await axios.put(
+      url,{},{
+        headers: {
+          "Authorization" : refreshToken,
+          "Content-Type" : "application/json"
+        }
+      }
+      
+    );
+    if(refreshTokenResponse.status === 200){
+      dispatch(setUserToken(refreshTokenResponse.data))
+    }
+  }catch(error:any){
+    dispatch(logout());
+  }
+};
   return (
     <SafeAreaView style={favsStyles.container}>
       <View style={favsStyles.header}>
