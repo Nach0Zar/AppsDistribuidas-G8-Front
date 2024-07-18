@@ -93,7 +93,6 @@ export const NewCommentScreen = ({route}: props) => {
             },
           },
         );
-        console.log(comentario)
         if (response.status === 200) {
           navigation.goBack();
           setIsLoading(false);
