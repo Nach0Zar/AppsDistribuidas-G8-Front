@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, TextInput, Text, ScrollView, ActivityIndicator, FlatList, Dimensions } from 'react-native';
 import homeStyles from '../styles/homeStyles';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, StackActions } from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack'
 import Routes from '../../Navigation/Routes';
 import InternalError from './errors/InternalError';
@@ -10,7 +10,7 @@ import { Global } from '../../Constants';
 import axios from 'axios';
 import MovieCard from '../components/atoms/MovieCard';
 import { COLOR } from '../styles/Theme';
-import { useSelector } from 'react-redux';
+import ConnectionStatus from '../assets/ConnectionStatus';
 
 const { width, height } = Dimensions.get('window');
 
@@ -54,6 +54,10 @@ const Home = () => {
 
   const getMovies = async ( genre:any, page:number ) => {
     try {
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       let url = Global.BASE_URL+`/movies?genre=${genre.id}&page=${page}`
       const response = await axios.get(url);
       const movies = response.data;
@@ -61,8 +65,7 @@ const Home = () => {
       setHasMorePages(movies.length == 20);
       setLoadingMovies(false);
     } 
-    catch (error) {
-      console.log(error);
+    catch (error: any) {
       setLoadingMovies(false);
       setHasMorePages(false);
     }
@@ -70,6 +73,10 @@ const Home = () => {
 
   const fetchGenres = async () => {
     try {
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       let url = Global.BASE_URL+`/genres`
       const response = await axios.get(url);
       setGenres(response.data);
@@ -81,9 +88,12 @@ const Home = () => {
   const fetchLanding = async () => {
     setIsLoading(true);
     await fetchGenres(); //fetching genres
-
     try {
       //fetching new movies
+      let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
       const url = `${Global.BASE_URL}/movies?release_sort=release.desc&quantity=10`;
       const response = await axios.get(url);
       setNewMovies(response.data);
@@ -99,6 +109,10 @@ const Home = () => {
 
     for (const genre of landingGenres) {
       try {
+        let connectionStatus = await ConnectionStatus()
+      if(!connectionStatus){
+        navigation.dispatch(StackActions.replace(Routes.InternetError));
+      }
         const url = `${Global.BASE_URL}/movies?genre=${genre.id}&quantity=10`;
         const response = await axios.get(url);
         genre.setter(response.data);
