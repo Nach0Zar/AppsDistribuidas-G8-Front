@@ -81,7 +81,6 @@ export const NewCommentScreen = ({route}: props) => {
         date: new Date().toISOString(),
         qualification: rating
       };
-      console.log(comentario)
       if (userId) {
         const response = await axios.post(
           Global.BASE_URL + '/comments',

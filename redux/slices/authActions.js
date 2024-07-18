@@ -8,7 +8,6 @@ export const userLogin = createAsyncThunk(
   async () => {
     await GoogleSignIn.signIn();
     const newTokens = await GoogleSignIn.getTokens();
-    console.log(newTokens.accessToken)
     const postAuthResponse = await axios.post(
       Global.BASE_URL + '/auths',
       {},
@@ -28,7 +27,6 @@ export const userLogin = createAsyncThunk(
         },
       },
     );
-    console.log(postAuthResponse.data.jwt)
     const payload = {
       userToken: postAuthResponse.data.jwt,
       refreshToken: postAuthResponse.data.refreshToken,
