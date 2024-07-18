@@ -57,24 +57,27 @@ const Favs = () => {
         }
       );
       const movies = response.data
-      if(movies.length === 0){
-        setShowNoResults(true);
-        setShowMovies(false);
-      } 
-      else {
-        setMovies([])
-        setMovies(movies)
+      if(Array.isArray(movies) && movies.length > 0){
+        setMovies(movies);
         setShowNoResults(false);
         setShowMovies(true);
+      } else {
+        setMovies([]);
+        setShowNoResults(true);
+        setShowMovies(false);
       }
     } 
-    catch(error:any) {
+    catch(error) {
+      console.log(error)
+      setMovies([]);
+      setShowNoResults(true);
+      setShowMovies(false);
       if(error.response && error.response.status === 403){
         handleRefreshToken();
       }
     }
     setLoading(false);
-};
+  };
 
 const handleRefreshToken = async () => {
   try{
@@ -110,7 +113,7 @@ const handleRefreshToken = async () => {
       </View>
       {loading && (
         <View style={favsStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLOR.second} style={favsStyles.activityIndicator} />
+          <ActivityIndicator size="small" color={COLOR.second} style={favsStyles.activityIndicator} />
         </View>
       )}
       {showNoResults && (
